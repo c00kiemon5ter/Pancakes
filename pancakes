@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# writen by Ivan c00kiemon5ter Kanakarakis ~ <ivan.kanak[at]gmail.com>
+# dependencies: bash + coreutils (/bin/{mkdir,mkfifo,rm}, /usr/bin/env)
+
+prefix="$HOME/irc"
+nickname="pancakes"
+realname="cookiebot"
+passwd="secret"
+mode="+i"
+hostname="cookiebox"
+servername="biscuit"
+port="6667"
+declare -A servers=(
+[irc.freenode.net]="#foss-aueb"
+)
+
+nickname="${nickname:-${USER}}"
+realname="${realname:-${nickname}}"
+mode="${mode:-+iw}"
+/bin/mkdir -p "${prefix}"
+
+for server in "${!servers[@]}"; do
+    exec {ircfd}<> "${prefix}/${server}.errors.log" 2>&${ircfd}-
+
+    if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
+        printf -- "unable to connect to %s:%d\n" "${server}" "${port}"
+        continue
+    fi
+
+    printf -- "PASS %s\n" "${passwd}" >&${ircfd}
+    printf -- "NICK %s\n" "${nickname}" >&${ircfd}
+    printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
+    printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
+
+    for channel in ${servers[${server}]}; do
+        printf -- "JOIN %s\n" "${channel}" >&${ircfd}
+
+        fifo="${prefix}/${server}_${channel#\#}.in"
+        /bin/mkfifo "${fifo}"
+        {
+            exec {fffd}<>"${fifo}"
+
+            trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";
+            printf -- "%s: exiting ..\n" "${fifo}";' EXIT
+
+            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
+            # "%b/" | ☐ ← "\u2610" | ⚀ ← "\u2680" | ☉ ← "\u2609"
+
+            while read -u ${fffd}
+            do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
+            done
+        } &
+    done
+
+    {
+        trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
+        exec {ircfd}>&-; printf -- "%s: exiting ..\n" "irc";' EXIT
+
+        while read -u ${ircfd}; do
+            set -- ${REPLY//$'\r'/}
+            [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
+
+            read who act chan cmd <<< "${REPLY%}"
+
+            if [[ "${act}" == "PRIVMSG" ]]; then
+                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${chan#\#}_$(date +"%F").log"
+
+                who="${who#:}" who="${who%\!*}"
+                if [[ ${who} != ${nickname} && "${cmd}" =~ ^:\! ]]; then
+                    bash commands "${cmd#:\!}" "${chan}" "${who}" "${nickname}" >&${ircfd}
+                fi
+            fi
+        done
+    } &
+done
+

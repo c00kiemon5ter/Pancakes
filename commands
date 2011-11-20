@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+cmd="$1"
+chan="$2"
+who="$3"
+me="$4"
+
+[[ "${cmd}" =~ ^[[:alpha:]]+\ *\>\ *[[:alpha:]]+ ]] && {
+    IFS=" > " read cmd args <<< "${cmd}"
+    read who args <<< "${args}"
+} || read cmd args <<< "${cmd}"
+
+commands=(help list fu forever yuno cookies sexy)
+
+case "${cmd}" in
+    help)
+        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "help yourself!"
+        ;;
+    list)
+        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "${commands[*]}"
+        ;;
+    [Ff][Uu])
+        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "fuuuuuuuuu!"
+        ;;
+    forever)
+        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "forever aloooone!"
+        ;;
+    yuno)
+        [[ -z "${args}" ]] && args="Y U NO"
+        printf -- "PRIVMSG %s :%s: Y U NO %s ?\n" "${chan}" "${who}" "${args}"
+        ;;
+    cookies)
+        [[ "${who}" == "c00kiemon5ter" ]] \
+            && printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "yes, master!" \
+            || printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "bake em'"
+        ;;
+    sexy)
+        printf -- "PRIVMSG %s :ACTION %s: %s\n" "${chan}" "${who}" "le sexy time!"
+        ;;
+esac
+
