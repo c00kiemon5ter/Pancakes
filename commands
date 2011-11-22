@@ -71,8 +71,12 @@ case "${what}" in
             || sayit "bake em'"
         ;;
     google)
-        # FIXME: report first three results - title & links
-        sayit "under construction"
+        who="" api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
+        curl -s --get --data-urlencode "q=${args// /+}" ${api}          \
+            | sed 's/{\|,/&\n/g'                                        \
+            | sed -n '/unescapedUrl/s/"unescapedUrl":"\(.\+\)".*/\1/p'  \
+            | cat -n                                                    \
+            | while read -r _n _r; do sayit "${_n}. ${_r}"; done
         ;;
     fortune)
         newho="→" who="" sayit "$(/usr/bin/fortune -sea)"
