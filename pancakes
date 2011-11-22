@@ -37,39 +37,35 @@ for server in "${!servers[@]}"; do
 
         fifo="${prefix}/${server}_${channel#\#}.in"
         /bin/mkfifo "${fifo}"
-        {
-            exec {fffd}<>"${fifo}"
+        {   exec {fffd}<>"${fifo}"
 
             trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";
             printf -- "%s: exiting ..\n" "${fifo}";' EXIT
 
-            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
-            # "%b/" | ☐ ← "\u2610" | ⚀ ← "\u2680" | ☉ ← "\u2609"
+            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd} # "%b/" | ☐ ← "\u2610" | ⚀ ← "\u2680" | ☉ ← "\u2609"
 
-            while read -u ${fffd}
+            while read -r -u ${fffd}
             do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
             done
         } &
     done
 
-    {
-        trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
+    {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
         exec {ircfd}>&-; printf -- "%s: exiting ..\n" "irc";' EXIT
 
-        while read -u ${ircfd}; do
+        while read -r -u ${ircfd}; do
             set -- ${REPLY//$'\r'/}
             [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
 
-            read who act chan cmd <<< "${REPLY%}"
+            read -r who did where what <<< "${REPLY%}"
+            [[ "${did}" =~ ^("PART"|"QUIT")$ ]] && what=':!PART' \
+                || [[ "${did}" == "JOIN" ]]     && what=':!JOIN' \
+                || [[ "${did}" == "PRIVMSG" ]]  || continue
 
-            if [[ "${act}" == "PRIVMSG" ]]; then
-                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${chan#\#}_$(date +"%F").log"
+            printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
 
-                who="${who#:}" who="${who%\!*}"
-                if [[ ${who} != ${nickname} && "${cmd}" =~ ^:\! ]]; then
-                    bash commands "${cmd#:\!}" "${chan}" "${who}" "${nickname}" >&${ircfd}
-                fi
-            fi
+            [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
+            bash commands "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" >&${ircfd}
         done
     } &
 done
