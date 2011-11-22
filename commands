@@ -11,18 +11,19 @@ sayit() {
 }
 
 if [[ "${what}" =~ ^[[:alpha:]]+\ *\>\ *[[:alpha:]]+ ]]; then
-    IFS=\>${IFS} read -r what args <<< "${what}"
-    read -r newho args <<< "${args}"
+    IFS=\>${IFS} read -r what args  <<< "${what}"
+                 read -r newho args <<< "${args}"
 elif [[ "${what}" =~ [[:alpha:]]+\ *\>\ *[[:alpha:]]+$ ]]; then
     IFS=\> read -r args newho <<< "${what}"
-    read -r what args <<< "${args}"
-    read -r newho <<< "${newho}"
+           read -r what args  <<< "${args}"
+           read -r newho      <<< "${newho}"
 else
     read -r what args <<< "${what}"
 fi
 
 commands=(help list ping test fu forever yuno problem sexy cookies
-          pokerface google fortune bewbs gn umad ccc)
+          pokerface google fortune bewbs gn umad ccc troll random)
+[[ "${what}" == random ]] && what="${commands[$((RANDOM%${#commands[@]}))]}"
 
 case "${what}" in
     JOIN)
@@ -89,6 +90,9 @@ case "${what}" in
         ;;
     cool)
         who="" sayit "cool.story.bro."
+        ;;
+    troll)
+        sayit "trololololololololololololo"
         ;;
     [[:alpha:]]*)
         newho="" sayit "you don't know what you're talking about, do you?"
