@@ -1,41 +1,97 @@
 #!/usr/bin/env bash
 
-cmd="$1"
-chan="$2"
-who="$3"
-me="$4"
+what="$1"
+where="$2"
+who="${3%\!*}"
+whoami="$4"
+op="c00kiemon5ter"
 
-[[ "${cmd}" =~ ^[[:alpha:]]+\ *\>\ *[[:alpha:]]+ ]] && {
-    IFS=" > " read cmd args <<< "${cmd}"
-    read who args <<< "${args}"
-} || read cmd args <<< "${cmd}"
+sayit() {
+    printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*"
+}
 
-commands=(help list fu forever yuno cookies sexy)
+if [[ "${what}" =~ ^[[:alpha:]]+\ *\>\ *[[:alpha:]]+ ]]; then
+    IFS=\>${IFS} read -r what args <<< "${what}"
+    read -r newho args <<< "${args}"
+elif [[ "${what}" =~ [[:alpha:]]+\ *\>\ *[[:alpha:]]+$ ]]; then
+    IFS=\> read -r args newho <<< "${what}"
+    read -r what args <<< "${args}"
+    read -r newho <<< "${newho}"
+else
+    read -r what args <<< "${what}"
+fi
 
-case "${cmd}" in
-    help)
-        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "help yourself!"
+commands=(help list ping test fu forever yuno problem sexy cookies
+          pokerface google fortune bewbs gn umad ccc)
+
+case "${what}" in
+    JOIN)
+        newho="ACTION" sayit "la presentato le herpino, ${who}"
+        ;;
+    PART)
+        newho="ACTION" sayit "bye herp derp, ${who}"
         ;;
     list)
-        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "${commands[*]}"
+        sayit "${commands[*]}"
+        ;;
+    help)
+        sayit "help yourself!"
+        ;;
+    ping)
+        sayit "pong!"
+        ;;
+    test)
+        sayit "tost ready!"
         ;;
     [Ff][Uu])
-        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "fuuuuuuuuu!"
+        sayit "fuuuuuuuuu!"
         ;;
     forever)
-        printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "forever aloooone!"
+        sayit "forever aloooone!"
         ;;
-    yuno)
-        [[ -z "${args}" ]] && args="Y U NO"
-        printf -- "PRIVMSG %s :%s: Y U NO %s ?\n" "${chan}" "${who}" "${args}"
+    [yY][uU][nN][oO])
+        sayit "Y U NO ${args:-y u no?}"
         ;;
-    cookies)
-        [[ "${who}" == "c00kiemon5ter" ]] \
-            && printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "yes, master!" \
-            || printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${who}" "bake em'"
+    problem)
+        sayit "problem ${args}?"
         ;;
     sexy)
-        printf -- "PRIVMSG %s :ACTION %s: %s\n" "${chan}" "${who}" "le sexy time!"
+        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
+        ;;
+    pokerface)
+        sayit 'http://i.imgur.com/pKttU.jpg'
+        ;;
+    cookies)
+        [[ "${who}" == "${op}" ]] \
+            && sayit "om nom nom nom nom nom nom nom nom nom" \
+            || sayit "bake em'"
+        ;;
+    google)
+        # FIXME: report first three results - title & links
+        sayit "under construction"
+        ;;
+    fortune)
+        newho="→" who="" sayit "$(/usr/bin/fortune -sea)"
+        ;;
+    bewbs)
+        newho="" who="" [[ "${args}" == "moar" ]] \
+            && sayit "(  @  )(  @  )" || sayit "( . )( . )"
+        ;;
+    gn)
+        [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
+                            || who="" sayit "sleep is for the weak."
+        ;;
+    umad)
+        sayit "u mad, bro? ${args}"
+        ;;
+    ccc)
+        newho="" who="" sayit "cococo-co-combobreaker!"
+        ;;
+    cool)
+        who="" sayit "cool.story.bro."
+        ;;
+    [[:alpha:]]*)
+        newho="" sayit "you don't know what you're talking about, do you?"
         ;;
 esac
 
