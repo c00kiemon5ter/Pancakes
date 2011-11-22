@@ -75,8 +75,8 @@ case "${what}" in
         newho="→" who="" sayit "$(/usr/bin/fortune -sea)"
         ;;
     bewbs)
-        newho="" who="" [[ "${args}" == "moar" ]] \
-            && sayit "(  @  )(  @  )" || sayit "( . )( . )"
+        newho="" who=""
+        [[ "${args}" == "moar" ]] && sayit "(  @  )(  @  )" || sayit "( . )( . )"
         ;;
     gn)
         [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
