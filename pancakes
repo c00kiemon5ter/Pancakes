@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # writen by Ivan c00kiemon5ter Kanakarakis ~ <ivan.kanak[at]gmail.com>
-# dependencies: bash + coreutils (/bin/{mkdir,mkfifo,rm}, /usr/bin/env)
 
 prefix="$HOME/irc"
 nickname="pancakes"
@@ -58,9 +57,9 @@ for server in "${!servers[@]}"; do
             [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
 
             read -r who did where what <<< "${REPLY%}"
-            [[ "${did}" =~ ^("PART"|"QUIT")$ ]] && what=':!PART' \
-                || [[ "${did}" == "JOIN" ]]     && what=':!JOIN' \
-                || [[ "${did}" == "PRIVMSG" ]]  || continue
+            {  [[ "${did}" == "PART" ]] && what=':!PART'; } || \
+            {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
+               [[ "${did}" == "PRIVMSG" ]] || continue
 
             printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
 
