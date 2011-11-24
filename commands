@@ -38,6 +38,10 @@ case "${what}" in
     help)
         sayit "help yourself!"
         ;;
+    bloat)
+        who=""
+        [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
+        ;;
     ping)
         sayit "pong!"
         ;;
