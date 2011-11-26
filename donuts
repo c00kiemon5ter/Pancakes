@@ -43,7 +43,7 @@ case "${what}" in
         [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
         ;;
     ping)
-        sayit "pong!"
+        [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
         ;;
     test)
         sayit "tost ready!"

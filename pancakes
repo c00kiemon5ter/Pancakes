@@ -64,7 +64,7 @@ for server in "${!servers[@]}"; do
             printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
 
             [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
-            /bin/bash "$(dirname "$0")/commands" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" >&${ircfd}
+            exec "$(dirname "$0")/donuts" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" >&${ircfd} &
         done
     } &
 done
