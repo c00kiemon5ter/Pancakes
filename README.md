@@ -2,10 +2,11 @@ Pancakes
 ========
 Minimal IRC bot and logger in pure Bash.
 
+- Easy configuration on separate file
+- Dynamic configuration and adjust of commands.
 - Owner can talk through it, sending data to the appropriate
   pipe created for each channel it connects to.
 - Supports connections to multiple networks and channels.
-- Dynamic configuration and adjust of commands.
 - Can support different commands per channel or user.
 
 Dependencies
@@ -26,7 +27,7 @@ Proposed features
 Proposed commands
 -----------------
 - !all
-  hilight everyone in the room
+  hilight everyone in the room with a message
 
 ToDo
 ----

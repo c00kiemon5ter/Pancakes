@@ -1,47 +1,74 @@
 #!/usr/bin/env bash
 # writen by Ivan c00kiemon5ter Kanakarakis ~ <ivan.kanak[at]gmail.com>
 
-prefix="$HOME/irc"
-nickname="pancakes"
-realname="cookiebot"
-passwd="secret"
-mode="+i"
-hostname="cookiebox"
-servername="biscuit"
-port="6667"
-declare -A servers=(
-[irc.freenode.net]="#foss-aueb"
-)
+path="$(dirname "$0")"
+sugar="${path}/sugar.conf"
+donuts="${path}/donuts"
 
-nickname="${nickname:-${USER}}"
-realname="${realname:-${nickname}}"
-mode="${mode:-+iw}"
-/bin/mkdir -p "${prefix}"
+[[ -r "${donuts}" ]] || {
+    printf -- "error: cannot read commands: %s\n" "${donuts}"
+    exit 1
+}
+
+declare -A conf
+declare -A servers
+
+[[ -r "${sugar}" ]] && while read -r; do
+    if [[ "${REPLY}" =~ ^[[:alpha:]]+[[:space:]]*=[[:space:]]*[[:alnum:]$/+]+[[:space:]]*$ ]]; then
+        IFS+='='; read -r key val _ <<< "${REPLY}"
+        conf["${key}"]="${val}"
+    elif [[ "$REPLY" =~ ^server[[:space:]]*=[[:space:]]*([[:alpha:]]+\.)+[[:alpha:]]+[[:space:]]*=[[:space:]]*#[[:alnum:]-]+(([[:space:]]+#[[:alnum:]-]+)+)?[[:space:]]*$ ]]; then
+        IFS+='='; read -r _ server channels <<< "${REPLY}"
+        servers["${server}"]="$channels"
+    else
+        continue
+    fi
+done < "${sugar}" || {
+    printf -- "error: cannot read configuration: %s\n" "${sugar}"
+    exit 1
+}
+
+: ${conf[prefix]:="${HOME}/irc"}
+: ${conf[nickname]:="pancakes"}
+: ${conf[realname]:="cookiebot"}
+: ${conf[mode]:="+iw"}
+: ${conf[hostname]:="cookiebox"}
+: ${conf[servername]:="biscuit"}
+: ${conf[port]:="6667"}
+
+/bin/mkdir -p "${conf[prefix]}" || {
+    printf -- "error: cannot create prefix: %s\n" "${conf[prefix]}"
+    exit 1
+}
 
 for server in "${!servers[@]}"; do
-    exec {ircfd}<> "${prefix}/${server}.errors.log" 2>&${ircfd}-
+    exec {ircfd}<> "${conf[prefix]}/${server}.errors.log" 2>&${ircfd}-
 
-    if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
-        printf -- "unable to connect to %s:%d\n" "${server}" "${port}"
+    if ! exec {ircfd}<> /dev/tcp/${server}/${conf[port]}; then
+        printf -- "unable to connect to server: %s:%d\n" "${server}" "${conf[port]}"
         continue
     fi
 
-    printf -- "PASS %s\n" "${passwd}" >&${ircfd}
-    printf -- "NICK %s\n" "${nickname}" >&${ircfd}
-    printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
-    printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
+    printf -- "PASS %s\n" "${conf[passwd]}" >&${ircfd}
+    printf -- "NICK %s\n" "${conf[nickname]}" >&${ircfd}
+    printf -- "MODE %s %s\n" "${conf[nickname]}" "${conf[mode]}" >&${ircfd}
+    printf -- "USER %s %s %s :%s\n" "${conf[nickname]}" "${conf[hostname]}" "${conf[servername]}" "${conf[realname]}" >&${ircfd}
 
     for channel in ${servers[${server}]}; do
         printf -- "JOIN %s\n" "${channel}" >&${ircfd}
 
-        fifo="${prefix}/${server}_${channel#\#}.in"
-        /bin/mkfifo "${fifo}"
+        fifo="${conf[prefix]}/${server}_${channel#\#}.in"
+        /bin/mkfifo "${fifo}" || {
+            printf -- "error: cannot create fifo: %s\n" "${fifo}"
+            continue
+        }
+
         {   exec {fffd}<>"${fifo}"
 
             trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";
             printf -- "%s: exiting ..\n" "${fifo}";' EXIT
 
-            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd} # "%b/" | ☐ ← "\u2610" | ⚀ ← "\u2680" | ☉ ← "\u2609"
+            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
 
             while read -r -u ${fffd}
             do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
@@ -49,8 +76,8 @@ for server in "${!servers[@]}"; do
         } &
     done
 
-    {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
-        exec {ircfd}>&-; printf -- "%s: exiting ..\n" "irc";' EXIT
+    {   trap 'printf -- "QUIT :%s will be back ..\n" "${conf[nickname]}" >&${ircfd};
+        exec {ircfd}>&-; printf -- "exiting ..\n";' EXIT
 
         while read -r -u ${ircfd}; do
             set -- ${REPLY//$'\r'/}
@@ -61,10 +88,10 @@ for server in "${!servers[@]}"; do
             {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
                [[ "${did}" == "PRIVMSG" ]] || continue
 
-            printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
+            printf -- "%s\n" "${REPLY}" >> "${conf[prefix]}/${server}_${where#*\#}_$(date +"%F").log"
 
-            [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
-            exec "$(dirname "$0")/donuts" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" >&${ircfd} &
+            [[ "${who%\!*}" != ":${conf[nickname]}" && "${what}" =~ ^:\! ]] || continue
+            exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${conf[nickname]}" >&${ircfd} &
         done
     } &
 done
