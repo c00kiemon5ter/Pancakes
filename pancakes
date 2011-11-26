@@ -17,9 +17,9 @@ declare -A servers
     if [[ "${REPLY}" =~ ^[[:alpha:]]+[[:space:]]*=[[:space:]]*[[:alnum:]$/+]+[[:space:]]*$ ]]; then
         IFS+='='; read -r key val _ <<< "${REPLY}"
         conf["${key}"]="${val}"
-    elif [[ "$REPLY" =~ ^server[[:space:]]*=[[:space:]]*([[:alpha:]]+\.)+[[:alpha:]]+[[:space:]]*=[[:space:]]*#[[:alnum:]-]+(([[:space:]]+#[[:alnum:]-]+)+)?[[:space:]]*$ ]]; then
+    elif [[ "${REPLY}" =~ ^server[[:space:]]*=[[:space:]]*([[:alpha:]]+\.)+[[:alpha:]]+[[:space:]]*=[[:space:]]*#[[:alnum:]-]+(([[:space:]]+#[[:alnum:]-]+)+)?[[:space:]]*$ ]]; then
         IFS+='='; read -r _ server channels <<< "${REPLY}"
-        servers["${server}"]="$channels"
+        servers["${server}"]="${channels}"
     else
         continue
     fi
