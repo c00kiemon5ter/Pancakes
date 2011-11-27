@@ -28,13 +28,13 @@ done < "${sugar}" || {
     exit 1
 }
 
-: ${conf[prefix]:="${HOME}/irc"}
-: ${conf[nickname]:="pancakes"}
-: ${conf[realname]:="cookiebot"}
-: ${conf[mode]:="+iw"}
-: ${conf[hostname]:="cookiebox"}
-: ${conf[servername]:="biscuit"}
-: ${conf[port]:="6667"}
+: "${conf[prefix]:="${HOME}/irc"}"
+: "${conf[nickname]:="pancakes"}"
+: "${conf[realname]:="cookiebot"}"
+: "${conf[mode]:="+iw"}"
+: "${conf[hostname]:="cookiebox"}"
+: "${conf[servername]:="biscuit"}"
+: "${conf[port]:="6667"}"
 
 /bin/mkdir -p "${conf[prefix]}" || {
     printf -- "error: cannot create prefix: %s\n" "${conf[prefix]}"
