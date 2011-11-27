@@ -23,7 +23,7 @@ fi
 
 commands=(help list ping test fu forever yuno problem sexy cookies
           pokerface google fortune bewbs gn umad ccc troll random f)
-[[ "${what}" == random ]] && what="${commands[$((RANDOM%${#commands[@]}))]}"
+[[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
     JOIN)
