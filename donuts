@@ -22,7 +22,7 @@ else
 fi
 
 commands=(help list ping test fu forever yuno problem sexy cookies
-          pokerface google fortune bewbs gn umad ccc troll random f)
+pokerface google fortune bewbs gn umad ccc troll random f money)
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -104,6 +104,15 @@ case "${what}" in
         ;;
     troll)
         sayit "trololololololololololololo"
+        ;;
+    money)
+        if [[ "$args" =~ ^[[:digit:]]+[[:space:]]+[[:alpha:]]+[[:space:]]+[[:alpha:]]+ ]]; then
+            read n f t _ <<< "${args}"
+            args="$(curl -s 'http://www.google.com/ig/calculator?hl=en&q='${n}${f}=?${t} | sed -r 's/.*"(.+)",.*"(.+)",.*".*/\1 → \2/')"
+            [[ "${args}" =~ ^\{ ]] && newho= sayit "no such unit" || sayit "${args}"
+        else
+            newho= sayit "invalid input"
+        fi
         ;;
     [[:alnum:]]*)
         newho="" sayit "you don't know what you're talking about, do you?"
