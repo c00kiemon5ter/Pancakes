@@ -10,10 +10,10 @@ sayit() {
     printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*"
 }
 
-if [[ "${what}" =~ ^[[:alnum:]]+\ *\>\ *[[:alnum:]]+ ]]; then
+if [[ "${what}" =~ ^[[:alnum:]]+\ *\>\ *[[:alnum:]_-]+ ]]; then
     IFS=\>${IFS} read -r what args  <<< "${what}"
                  read -r newho args <<< "${args}"
-elif [[ "${what}" =~ [[:alnum:]]+\ *\>\ *[[:alnum:]]+$ ]]; then
+elif [[ "${what}" =~ [[:alnum:]]+\ *\>\ *[[:alnum:]_-]+$ ]]; then
     IFS=\> read -r args newho <<< "${what}"
            read -r what args  <<< "${args}"
            read -r newho      <<< "${newho}"
