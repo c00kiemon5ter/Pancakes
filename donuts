@@ -21,8 +21,8 @@ else
     read -r what args <<< "${what}"
 fi
 
-commands=(help list ping test fu forever yuno problem sexy cookies
-pokerface google fortune bewbs gn umad ccc troll random f money calc)
+commands=(help list ping test fu forever yuno problem sexy cookies cool
+pokerface google fortune bewbs gn umad ccc troll random f money calc rhyme)
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -115,8 +115,16 @@ case "${what}" in
         fi
         ;;
     calc)
-        [[ "${args}" =~ ^([[:digit:]]|[-()^\+*/\ ])+$ ]] && sayit $(echo "${args}" | bc -l) \
-        || sayit "your argument is invalid!"
+        [[ "${args}" =~ ^([[:digit:]]|[-()^\+*/\ ])+$ ]]    \
+            && sayit $(echo "${args}" | bc -l)              \
+            || sayit "your argument is invalid!"
+        ;;
+    rhyme)
+        [[ -z "${args}" ]] && sayit "hit me, aw, I feel no pain, agh" && return
+        mapfile -t args < <(curl -s http://uberspot.ath.cx/rhymefinder/ -F "word=${args}" | \
+            sed -n -e '/textarea name="results"/s:.*>\(.*\):\1:' -e 's: | :\n:gp')
+        (( ${#args[@]} )) && who= sayit "${args[RANDOM%${#args[@]}]}" \
+                          || sayit "oh, this hurts bro, I cant rhyme with yo word'"
         ;;
     [[:alnum:]]*)
         newho="" sayit "you don't know what you're talking about, do you?"
