@@ -53,8 +53,7 @@ for server in "${!servers[@]}"; do
 
         {   exec {fffd}<>"${fifo}"
 
-            trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";
-            printf -- "%s: exiting ..\n" "${fifo}";' EXIT
+            trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";' EXIT
 
             printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
 
@@ -62,10 +61,12 @@ for server in "${!servers[@]}"; do
             do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
             done
         } &
+
+        chanpids+=($!)
     done
 
     {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
-        exec {ircfd}>&-; printf -- "exiting ..\n";' EXIT
+        exec {ircfd}>&-; for pid in "${chanpids[@]}"; do /bin/kill "${pid}"; done;' EXIT
 
         while read -r -u ${ircfd}; do
             set -- ${REPLY//$'\r'/}
@@ -79,7 +80,7 @@ for server in "${!servers[@]}"; do
             printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
 
             [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
-            exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" >&${ircfd} &
+            exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
         done
     } &
 done
