@@ -7,7 +7,9 @@ whoami="$4"
 op="c00kiemon5ter"
 
 sayit() {
-    printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*"
+	[[ "$(echo -n $* | /usr/bin/wc -c)" -lt "256" ]] && \
+    printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*" || \
+    printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "I see what you did there!"
 }
 
 if [[ "${what}" =~ ^[[:alnum:]]+\ *\>\ *[[:alnum:]_-]+ ]]; then
