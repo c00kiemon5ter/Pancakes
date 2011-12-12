@@ -115,9 +115,9 @@ case "${what}" in
         fi
         ;;
     calc)
-        [[ "${args}" =~ ^([[:digit:]]|[-()^\+*/\ ])+$ ]]    \
-            && sayit $(echo "${args}" | bc -l)              \
-            || sayit "your argument is invalid!"
+        args="$(bc -l <<< "${args}")"
+        [[ -z "${args}" ]] && sayit "err, ..no" \
+                           || sayit "${args}"
         ;;
     rhyme)
         [[ -z "${args}" ]] && sayit "hit me, aw, I feel no pain, agh" && return
