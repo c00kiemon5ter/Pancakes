@@ -107,7 +107,7 @@ case "${what}" in
         ;;
 	temp)
 		read city country _ <<< "${args}"
-	    [[ -z "$args" ]]  && city="Athens"; country="Greece"
+	    [[ -z "$city" ]]  && city="Athens" && country="Greece"
 		args="$(curl -s 'http://www.google.com/ig/api?weather='${city}+${country} | sed -r 's~.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([[:digit:]])".*humidity data="(.*%).*~\1 \2 \3\xe2\x84\x83 \4~')"
 		args="$(echo ${args} | sed -r 's~.*problem_cause.*~Invalid Input!~')"
 		sayit "${args}"
