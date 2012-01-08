@@ -74,7 +74,7 @@ for server in "${!servers[@]}"; do
     {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
         exec {ircfd}>&-; for pid in "${chanpids[@]}"; do /bin/kill "${pid}"; done;' EXIT
 
-        while read -r -u ${ircfd}; do
+        while read -r; do
             set -- ${REPLY//$'\r'/}
             [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
 
@@ -87,7 +87,7 @@ for server in "${!servers[@]}"; do
 
             [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
             exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
-        done
+        done <&${ircfd}
     } &
 done
 
