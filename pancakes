@@ -30,7 +30,8 @@ declare -A servers
 }
 
 for server in "${!servers[@]}"; do
-    exec {ircfd}<> "${prefix}/${server}.errors.log" 2>&${ircfd}-
+    mkdir -p "${prefix}/${server}"
+    exec {ircfd}<> "${prefix}/${server}/${server}.err" 2>&${ircfd}-
 
     if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
         printf -- "unable to connect to server: %s:%d\n" "${server}" "${port}"
@@ -42,7 +43,7 @@ for server in "${!servers[@]}"; do
     printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
     printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
 
-    while read -r; do # wait to get registered to server
+    while read -r; do # wait to get authed with the server
         set -- ${REPLY//$'\r'/}
         [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
         [[ "$2" == "001" ]] && printf -- "connected to: %s -- joining channels..\n" "${server}" && break
@@ -51,7 +52,7 @@ for server in "${!servers[@]}"; do
     for channel in ${servers[${server}]}; do
         printf -- "JOIN %s\n" "${channel}" >&${ircfd}
 
-        fifo="${prefix}/${server}_${channel#\#}.in"
+        fifo="${prefix}/${server}/${channel#\#}.in"
         /bin/mkfifo "${fifo}" || {
             printf -- "error: cannot create fifo: %s\n" "${fifo}"
             continue
@@ -83,7 +84,7 @@ for server in "${!servers[@]}"; do
             {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
                [[ "${did}" == "PRIVMSG" ]] || continue
 
-            printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
+            printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}_$(date +"%F").log"
 
             [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
             exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
