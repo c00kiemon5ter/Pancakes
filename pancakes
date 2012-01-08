@@ -39,8 +39,8 @@ for server in "${!servers[@]}"; do
 
     printf -- "PASS %s\n" "${passwd}" >&${ircfd}
     printf -- "NICK %s\n" "${nickname}" >&${ircfd}
-    printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
     printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
+    printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
 
     while read -r; do # wait to get registered to server
         set -- ${REPLY//$'\r'/}
