@@ -19,7 +19,7 @@ declare -A servers
 : "${prefix:="${HOME}/irc"}"
 : "${nickname:=pancakes}"
 : "${realname:=cookiebot}"
-: "${mode:=+iw}"
+: "${mode:=+ix}"
 : "${hostname:=cookiebox}"
 : "${servername:=biscuit}"
 : "${port:=6667}"
