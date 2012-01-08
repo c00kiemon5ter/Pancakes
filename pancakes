@@ -42,6 +42,12 @@ for server in "${!servers[@]}"; do
     printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
     printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
 
+    while read -r; do # wait to get registered to server
+        set -- ${REPLY//$'\r'/}
+        [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
+        [[ "$2" == "001" ]] && printf -- "connected to: %s -- joining channels..\n" "${server}" && break
+    done <&${ircfd}
+
     for channel in ${servers[${server}]}; do
         printf -- "JOIN %s\n" "${channel}" >&${ircfd}
 
