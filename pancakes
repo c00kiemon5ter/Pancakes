@@ -37,7 +37,7 @@ for server in "${!servers[@]}"; do
         continue
     fi
 
-    printf -- "PASS %s\n" "${passwd}" >&${ircfd}
+    [[ -n "${passwd}" ]] && printf -- "PASS %s\n" "${passwd}" >&${ircfd}
     printf -- "NICK %s\n" "${nickname}" >&${ircfd}
     printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
     printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
