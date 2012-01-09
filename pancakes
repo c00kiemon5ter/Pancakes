@@ -25,10 +25,7 @@ declare -A servers
 : "${servername:=biscuit}"
 : "${port:=6667}"
 
-/bin/mkdir -p "${prefix}" || {
-    printf -- "error: cannot create prefix: %s\n" "${prefix}"
-    exit 1
-}
+/bin/mkdir -p "${prefix}"
 
 for server in "${!servers[@]}"; do
     {   mkdir -p "${prefix}/${server}"
@@ -46,7 +43,6 @@ for server in "${!servers[@]}"; do
 
         while read -r; do # wait to get authed with the server
             (( DEBUG )) && printf -- "%s\n" "$REPLY" >> "${prefix}/${server}/raw.log"
-
             set -- ${REPLY//$'\r'/}
             [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
             [[ "$2" == "001" ]] && printf -- "connected to: %s -- joining channels..\n" "${server}" && break
@@ -55,14 +51,14 @@ for server in "${!servers[@]}"; do
         for channel in ${servers[${server}]}; do
             printf -- "JOIN %s\n" "${channel}" >&${ircfd}
 
-            fifo="${prefix}/${server}/${channel#\#}.in"
+            mkdir -p "${prefix}/${server}/${channel#\#}"
+            fifo="${prefix}/${server}/${channel#\#}/in"
             /bin/mkfifo "${fifo}" || {
                 printf -- "error: cannot create fifo: %s\n" "${fifo}"
                 continue
             }
 
             {   exec {fffd}<>"${fifo}"
-
                 trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";' EXIT
 
                 printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
@@ -89,7 +85,7 @@ for server in "${!servers[@]}"; do
                 {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
                    [[ "${did}" == "PRIVMSG" ]] || continue
 
-                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}_$(date +"%F").log"
+                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}/$(date +"%F").log"
 
                 [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
                 exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
