@@ -61,7 +61,7 @@ case "${what}" in
         sayit "Y U NO ${args:-y u no?}"
         ;;
     problem)
-        who="" sayit "problem ${args}?"
+        who="" sayit "problem, ${args}?"
         ;;
     sexy)
         who="ACTION ${who}" sayit "le sexy time <3 ${args}"
