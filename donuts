@@ -109,8 +109,8 @@ case "${what}" in
 		args="${args// /+}"
         [[ -z "$args" ]]  && args="Athens+Greece"
         args="$(curl -s 'http://www.google.com/ig/api?weather='${args} | sed -r \
-        's:.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([[:digit:]]+)".*humidity data="(.*%).*:\1 \2 \3\xe2\x84\x83 \4:')"
-        args="$(sed -r 's:.*problem_cause.*:Invalid Input!:' <<< "${args}")"
+        's:.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([-]?[[:digit:]]+)".*humidity data="(.*%).*:\1 \2 \3\xe2\x84\x83 \4:')"
+        args="$(sed -r 's:.*xml_api_reply.*:Ooooooooooooops!:' <<< "${args}")"
         sayit "${args}"
         ;;
     money)
