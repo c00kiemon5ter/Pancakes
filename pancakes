@@ -16,72 +16,81 @@ declare -A servers
     exit 1
 }
 
+[[ "$1" == '-d' ]] && DEBUG=1 || DEBUG=0
 : "${prefix:="${HOME}/irc"}"
 : "${nickname:=pancakes}"
 : "${realname:=cookiebot}"
-: "${mode:=+iw}"
+: "${mode:=+i}"
 : "${hostname:=cookiebox}"
 : "${servername:=biscuit}"
 : "${port:=6667}"
 
-/bin/mkdir -p "${prefix}" || {
-    printf -- "error: cannot create prefix: %s\n" "${prefix}"
-    exit 1
-}
+/bin/mkdir -p "${prefix}"
 
 for server in "${!servers[@]}"; do
-    exec {ircfd}<> "${prefix}/${server}.errors.log" 2>&${ircfd}-
+    {   mkdir -p "${prefix}/${server}"
+        exec {ircfd}<> "${prefix}/${server}/${server}.err" 2>&${ircfd}-
 
-    if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
-        printf -- "unable to connect to server: %s:%d\n" "${server}" "${port}"
-        continue
-    fi
-
-    printf -- "PASS %s\n" "${passwd}" >&${ircfd}
-    printf -- "NICK %s\n" "${nickname}" >&${ircfd}
-    printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
-    printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
-
-    for channel in ${servers[${server}]}; do
-        printf -- "JOIN %s\n" "${channel}" >&${ircfd}
-
-        fifo="${prefix}/${server}_${channel#\#}.in"
-        /bin/mkfifo "${fifo}" || {
-            printf -- "error: cannot create fifo: %s\n" "${fifo}"
+        if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
+            printf -- "unable to connect to server: %s:%d\n" "${server}" "${port}"
             continue
-        }
+        fi
 
-        {   exec {fffd}<>"${fifo}"
+        [[ -n "${passwd}" ]] && printf -- "PASS %s\n" "${passwd}" >&${ircfd}
+        printf -- "NICK %s\n" "${nickname}" >&${ircfd}
+        printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
+        printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
 
-            trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";' EXIT
-
-            printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
-
-            while read -r -u ${fffd}
-            do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
-            done
-        } &
-
-        chanpids+=($!)
-    done
-
-    {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
-        exec {ircfd}>&-; for pid in "${chanpids[@]}"; do /bin/kill "${pid}"; done;' EXIT
-
-        while read -r -u ${ircfd}; do
+        while read -r; do # wait to get authed with the server
+            (( DEBUG )) && printf -- "%s\n" "$REPLY" >> "${prefix}/${server}/raw.log"
             set -- ${REPLY//$'\r'/}
             [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
+            [[ "$2" == "001" ]] && printf -- "connected to: %s -- joining channels..\n" "${server}" && break
+        done <&${ircfd}
 
-            read -r who did where what <<< "${REPLY%}"
-            {  [[ "${did}" == "PART" ]] && what=':!PART'; } || \
-            {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
-               [[ "${did}" == "PRIVMSG" ]] || continue
+        for channel in ${servers[${server}]}; do
+            printf -- "JOIN %s\n" "${channel}" >&${ircfd}
 
-            printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}_${where#*\#}_$(date +"%F").log"
+            mkdir -p "${prefix}/${server}/${channel#\#}"
+            fifo="${prefix}/${server}/${channel#\#}/in"
+            /bin/mkfifo "${fifo}" || {
+                printf -- "error: cannot create fifo: %s\n" "${fifo}"
+                continue
+            }
 
-            [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
-            exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
+            {   exec {fffd}<>"${fifo}"
+                trap 'exec {fffd}>&-; /bin/rm -f "${fifo}";' EXIT
+
+                printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
+
+                while read -r -u ${fffd}
+                do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
+                done
+            } &
+
+            chanpids+=($!)
         done
+
+        {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
+            exec {ircfd}>&-; for pid in "${chanpids[@]}"; do /bin/kill "${pid}"; done;' EXIT
+
+            while read -r; do
+                (( DEBUG )) && printf -- "%s\n" "$REPLY" >> "${prefix}/${server}/raw.log"
+
+                set -- ${REPLY//$'\r'/}
+                [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
+
+                read -r who did where what <<< "${REPLY%}"
+                {  [[ "${did}" == "PART" ]] && what=':!PART'; } || \
+                {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
+                   [[ "${did}" == "PRIVMSG" ]] || continue
+
+                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}/$(date +"%F").log"
+
+                [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
+                exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
+            done <&${ircfd}
+        } &
     } &
 done
 
