@@ -134,6 +134,14 @@ case "${what}" in
         (( ${#args[@]} )) && who= sayit "${args[RANDOM%${#args[@]}]}" \
                           || sayit "oh, this hurts bro, I cant rhyme with yo word'"
         ;;
+    url)
+        args="$(sed 's_.*\(http://[^[:space:]]\+\).*_\1_' <<< "$args")"
+        args="$(curl -s "$args" | sed -n '/<title>/s_.*>\(.\+\)</title>_\1_p')"
+        [[ -n "$args" ]] && newho= who= sayit "$args"
+        ;;
+    echo)
+        who= sayit "$args"
+        ;;
     [[:alnum:]]*)
         newho="" sayit "you don't know what you're talking about, do you?"
         ;;
