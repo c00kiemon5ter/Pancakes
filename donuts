@@ -39,11 +39,11 @@ case "${what}" in
         sayit "help yourself!"
         ;;
     bloat)
-        who=""
+        who=
         [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
         ;;
     ping)
-        [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
+        [[ -n "${newho}" ]] && sayit "ping!" || sayit "ACK!"
         ;;
     test)
         sayit "tost ready!"
@@ -61,7 +61,7 @@ case "${what}" in
         sayit "Y U NO ${args:-y u no?}"
         ;;
     problem)
-        who="" sayit "problem, ${args}?"
+        who= sayit "problem, ${args}?"
         ;;
     sexy)
         who="ACTION ${who}" sayit "le sexy time <3 ${args}"
@@ -75,7 +75,7 @@ case "${what}" in
             || sayit "bake em'"
         ;;
     google)
-        who="" api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
+        who= api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
         curl -s --get --data-urlencode "q=${args// /+}" ${api}          \
             | sed 's/{\|,/&\n/g'                                        \
             | sed -n '/unescapedUrl/s/"unescapedUrl":"\(.\+\)".*/\1/p'  \
@@ -83,24 +83,24 @@ case "${what}" in
             | while read -r _n _r; do sayit "${_n}. ${_r}"; done
         ;;
     fortune)
-        newho="→" who="" sayit "$(/usr/bin/fortune -sea)"
+        newho="→" who= sayit "$(/usr/bin/fortune -sea)"
         ;;
     bewbs)
-        newho="" who=""
+        newho= who=
         [[ "${args}" == "moar" ]] && sayit "(  @  )(  @  )" || sayit "( . )( . )"
         ;;
     gn)
         [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
-                            || who="" sayit "sleep is for the weak."
+                            || who= sayit "sleep is for the weak."
         ;;
     umad)
         sayit "u mad, bro? ${args}"
         ;;
     ccc)
-        newho="" who="" sayit "cococo-co-combobreaker!"
+        newho= who= sayit "cococo-co-combobreaker!"
         ;;
     cool)
-        who="" sayit "cool.story.bro."
+        who= sayit "cool.story.bro."
         ;;
     troll)
         sayit "trololololololololololololo"
@@ -143,7 +143,7 @@ case "${what}" in
         who= sayit "$args"
         ;;
     [[:alnum:]]*)
-        newho="" sayit "you don't know what you're talking about, do you?"
+        newho= sayit "you don't know what you're talking about, do you?"
         ;;
 esac
 
