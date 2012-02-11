@@ -142,6 +142,9 @@ case "${what}" in
     echo)
         who= sayit "$args"
         ;;
+    trap)
+        who= sayit "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
+        ;;
     [[:alnum:]]*)
         newho= sayit "you don't know what you're talking about, do you?"
         ;;
