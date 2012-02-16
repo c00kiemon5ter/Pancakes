@@ -4,7 +4,7 @@ what="$1"
 where="$2"
 who="${3%\!*}"
 whoami="$4"
-op="c00kiemon5ter"
+op="$USER"
 
 sayit() {
     printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*"
