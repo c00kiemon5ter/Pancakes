@@ -83,7 +83,7 @@ case "${what}" in
             | while read -r _n _r; do sayit "${_n}. ${_r}"; done
         ;;
     fortune)
-        newho="→" who= sayit "$(/usr/bin/fortune -sea)"
+        newho="→" who= sayit "$(/usr/bin/fortune -osea)"
         ;;
     bewbs)
         newho= who=
