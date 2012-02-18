@@ -151,7 +151,8 @@ case "${what}" in
         who= sayit "oh the irony."
         ;;
     [[:alnum:]]*)
-        newho= sayit "you don't know what you're talking about, do you?"
+        #newho= sayit "you don't know what you're talking about, do you?"
+        newho= sayit "NO, YOU $what $args"
         ;;
 esac
 
