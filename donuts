@@ -21,9 +21,9 @@ else
     read -r what args <<< "${what}"
 fi
 
-commands=(help list ping test fu forever yuno problem sexy cookies cool
-i url echo pokerface google fortune bewbs gn umad ccc troll temp random
-f money calc rhyme)
+commands=(help list ping test fu alone yuno problem sexy cookies cool
+i url echo poker google fortune bewbs gn umad ccc troll temp random
+f fap money calc rhyme fakdat slap gay)
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -46,6 +46,21 @@ case "${what}" in
     ping)
         [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
         ;;
+    fakdat)
+        who= sayit "http://i.imgur.com/SP9gwh.jpg"
+        ;;
+    gay)
+        who= sayit "ULTRAgaaaay http://i.imgur.com/XJ4Aq.png"
+        ;;
+    fap)
+        who= sayit "http://i.imgur.com/EPaUf.jpg"
+        ;;
+    slap)
+        [[ -z $newho ]] && newho="his cohones"
+        [[ -z $args ]] && args="$who slaps $newho with a large smelly tuna fish" \
+                       || args="$who slaps $newho with a large $args"
+        who= newho= sayit "$args"
+        ;;
     test)
         sayit "tost ready!"
         ;;
@@ -55,8 +70,8 @@ case "${what}" in
     f)
         sayit "failed"
         ;;
-    forever)
-        sayit "forever aloooone!"
+    alone)
+        sayit "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
         ;;
     [yY][uU][nN][oO])
         sayit "Y U NO ${args:-y u no?}"
@@ -67,7 +82,7 @@ case "${what}" in
     sexy)
         who="ACTION ${who}" sayit "le sexy time <3 ${args}"
         ;;
-    pokerface)
+    poker)
         sayit 'http://i.imgur.com/pKttU.jpg'
         ;;
     cookies)
