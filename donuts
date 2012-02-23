@@ -21,9 +21,9 @@ else
     read -r what args <<< "${what}"
 fi
 
-commands=(help list ping test fu alone yuno problem sexy cookies cool
-i url echo poker google fortune bewbs gn umad ccc troll temp random
-f fap money calc rhyme fakdat slap gay)
+commands=( alone bloat bewbs calc ccc cookies cool echo f fakdat fap fortune
+fu gay gn google help i list money ping poker problem random rhyme sexy slap
+temp test trap troll umad url yuno )
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -33,62 +33,56 @@ case "${what}" in
     PART)
         newho="ACTION" sayit "bye herp derp, ${who}"
         ;;
-    list)
-        sayit "${commands[*]}"
+    alone)
+        sayit "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
         ;;
-    help)
-        sayit "help yourself!"
+    bewbs)
+        newho= who=
+        [[ "${args}" == "moar" ]] && sayit "(  @  )(  @  )" || sayit "( . )( . )"
         ;;
     bloat)
         who=
         [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
         ;;
-    ping)
-        [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
+    calc)
+        args="$(bc -l <<< "${args}")"
+        [[ -z "${args}" ]] && sayit "err, ..no" || sayit "${args}"
         ;;
-    fakdat)
-        who= sayit "http://i.imgur.com/SP9gwh.jpg"
-        ;;
-    gay)
-        who= sayit "ULTRAgaaaay http://i.imgur.com/XJ4Aq.png"
-        ;;
-    fap)
-        who= sayit "http://i.imgur.com/EPaUf.jpg"
-        ;;
-    slap)
-        [[ -z $newho ]] && newho="his cohones"
-        [[ -z $args ]] && args="$who slaps $newho with a large smelly tuna fish" \
-                       || args="$who slaps $newho with a large $args"
-        who= newho= sayit "$args"
-        ;;
-    test)
-        sayit "tost ready!"
-        ;;
-    [Ff][Uu])
-        sayit "fuuuuuuuuu!"
-        ;;
-    f)
-        sayit "failed"
-        ;;
-    alone)
-        sayit "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
-        ;;
-    [yY][uU][nN][oO])
-        sayit "Y U NO ${args:-y u no?}"
-        ;;
-    problem)
-        who= sayit "problem, ${args}?"
-        ;;
-    sexy)
-        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
-        ;;
-    poker)
-        sayit 'http://i.imgur.com/pKttU.jpg'
+    ccc)
+        newho= who= sayit "cococo-co-combobreaker!"
         ;;
     cookies)
         [[ "${who}" == "${op}" ]] \
             && sayit "om nom nom nom nom nom nom nom nom nom" \
             || sayit "bake em'"
+        ;;
+    cool)
+        who= sayit "cool.story.bro."
+        ;;
+    echo)
+        who= sayit "$args"
+        ;;
+    f)
+        sayit "failed"
+        ;;
+    fakdat)
+        who= sayit "http://i.imgur.com/SP9gwh.jpg"
+        ;;
+    fap)
+        who= sayit "http://i.imgur.com/EPaUf.jpg"
+        ;;
+    fortune)
+        newho="→" who= sayit "$(/usr/bin/fortune -osea)"
+        ;;
+    [Ff][Uu])
+        sayit "fuuuuuuuuu!"
+        ;;
+    gay)
+        who= sayit "ULTRAgaaaay http://i.imgur.com/XJ4Aq.png"
+        ;;
+    gn)
+        [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
+                            || who= sayit "sleep is for the weak."
         ;;
     google)
         who= api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
@@ -98,36 +92,14 @@ case "${what}" in
             | cat -n                                                    \
             | while read -r _n _r; do sayit "${_n}. ${_r}"; done
         ;;
-    fortune)
-        newho="→" who= sayit "$(/usr/bin/fortune -osea)"
+    help)
+        sayit "help yourself! try !list"
         ;;
-    bewbs)
-        newho= who=
-        [[ "${args}" == "moar" ]] && sayit "(  @  )(  @  )" || sayit "( . )( . )"
+    i)
+        who= sayit "oh the irony."
         ;;
-    gn)
-        [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
-                            || who= sayit "sleep is for the weak."
-        ;;
-    umad)
-        sayit "u mad, bro? ${args}"
-        ;;
-    ccc)
-        newho= who= sayit "cococo-co-combobreaker!"
-        ;;
-    cool)
-        who= sayit "cool.story.bro."
-        ;;
-    troll)
-        sayit "trololololololololololololo"
-        ;;
-    temp)
-        read -r city country _ <<< "${args}"
-        [[ -z "$city" ]] && city="Athens" country="Greece"
-        args="$(curl -s 'http://www.google.com/ig/api?weather='${city}+${country} | sed -r \
-        's:.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([[:digit:]]+)".*humidity data="(.*%).*:\1 \2 \3\xe2\x84\x83 \4:')"
-        args="$(sed -r 's:.*problem_cause.*:Invalid Input!:' <<< "${args}")"
-        sayit "${args}"
+    list)
+        sayit "${commands[*]}"
         ;;
     money)
         if [[ "$args" =~ ^[[:digit:]]+[[:space:]]+[[:alpha:]]+[[:space:]]+[[:alpha:]]+ ]]; then
@@ -138,10 +110,14 @@ case "${what}" in
             newho= sayit "invalid input"
         fi
         ;;
-    calc)
-        args="$(bc -l <<< "${args}")"
-        [[ -z "${args}" ]] && sayit "err, ..no" \
-                           || sayit "${args}"
+    ping)
+        [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
+        ;;
+    poker)
+        sayit 'http://i.imgur.com/pKttU.jpg'
+        ;;
+    problem)
+        who= sayit "problem, ${args}?"
         ;;
     rhyme)
         [[ -z "${args}" ]] && sayit "hit me, aw, I feel no pain, agh" && return
@@ -150,22 +126,45 @@ case "${what}" in
         (( ${#args[@]} )) && who= sayit "${args[RANDOM%${#args[@]}]}" \
                           || sayit "oh, this hurts bro, I cant rhyme with yo word'"
         ;;
+    sexy)
+        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
+        ;;
+    slap)
+        [[ -z $newho ]] && newho="his cohones"
+        [[ -z $args ]] && args="$who slaps $newho with a large smelly tuna fish" \
+                       || args="$who slaps $newho with a large $args"
+        who= newho= sayit "$args"
+        ;;
+    temp)
+        read -r city country _ <<< "${args}"
+        [[ -z "$city" ]] && city="Athens" country="Greece"
+        args="$(curl -s 'http://www.google.com/ig/api?weather='${city}+${country} | sed -r \
+        's:.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([[:digit:]]+)".*humidity data="(.*%).*:\1 \2 \3\xe2\x84\x83 \4:')"
+        args="$(sed -r 's:.*problem_cause.*:Invalid Input!:' <<< "${args}")"
+        sayit "${args}"
+        ;;
+    test)
+        sayit "tost ready!"
+        ;;
+    trap)
+        who= sayit "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
+        ;;
+    troll)
+        sayit "trololololololololololololo"
+        ;;
+    umad)
+        sayit "u mad, bro? ${args}"
+        ;;
     url)
         args="$(sed 's_.*\(http://[^[:space:]]\+\).*_\1_' <<< "$args")"
         args="$(sed '/youtube/s_.*watch?v=\([^&]\+\).*_http://www.youtube.com/embed/\1_' <<< "$args")"
         args="$(curl -s "$args" | sed -n '/<title>/s_.*>\(.\+\)</title>_\1_p')"
         [[ -n "$args" ]] && newho= who= sayit "$args"
         ;;
-    echo)
-        who= sayit "$args"
+    [yY][uU][nN][oO])
+        sayit "Y U NO ${args:-y u no?}"
         ;;
-    trap)
-        who= sayit "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
-        ;;
-    i)
-        who= sayit "oh the irony."
-        ;;
-    [[:alnum:]]*)
+    *)
         #newho= sayit "you don't know what you're talking about, do you?"
         newho= sayit "NO, YOU $what $args"
         ;;
