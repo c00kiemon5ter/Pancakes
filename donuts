@@ -22,8 +22,8 @@ else
 fi
 
 commands=( alone bloat bewbs calc ccc cookies cool echo f fakdat fap fortune
-fu gay gn google help i list money ping poker problem random rhyme sexy slap
-temp test trap troll umad url yuno )
+fu gay gn google help i links list money ping poker problem random rhyme sexy
+slap temp test trap troll umad url yuno )
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -98,6 +98,9 @@ case "${what}" in
     i)
         who= sayit "oh the irony."
         ;;
+    links)
+        sayit "all you links are belong to me! https://bitly.com/u/pancakesbot"
+        ;;
     list)
         sayit "${commands[*]}"
         ;;
@@ -157,9 +160,10 @@ case "${what}" in
         ;;
     url)
         args="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"
+        tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${args}&format=txt")"
         args="$(sed '/youtu\.\?be/s,.*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"
         args="$(curl -s "$args" | sed -n '/<title>/s_.*>\(.\+\)</title>_\1_p')"
-        [[ -n "$args" ]] && newho= who= sayit "$args"
+        newho= who= sayit ":: $tiny - ${args:-"I guess some funny pic of some sort /b/tards"}"
         ;;
     [yY][uU][nN][oO])
         sayit "Y U NO ${args:-y u no?}"
