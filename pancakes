@@ -87,7 +87,7 @@ for server in "${!servers[@]}"; do
 
                 printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}/$(date +"%F").log"
 
-                [[ "${what}" =~ http:// ]] && what=':!'"${what/#:/url }" # pick up urls and send a !url cmd
+                [[ "${what}" =~ https?:// ]] && what=':!'"${what/#:/url }" # pick up urls and send a !url cmd
                 [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\! ]] || continue
                 exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | /bin/cut -c -255 >&${ircfd} &
             done <&${ircfd}
