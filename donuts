@@ -162,7 +162,7 @@ case "${what}" in
         args="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"
         tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${args%#*}&format=txt")"
         args="$(sed '/youtu\.\?be/s,.*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"
-        args="$(curl -s "$args" | sed -n '/<title>/s_.*>\(.\+\)</title>_\1_p')"
+        args="$(curl -s "$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
         newho= who= sayit ":: $tiny - ${args:-"I guess some funny pic of some sort /b/tards"}"
         ;;
     [yY][uU][nN][oO])
