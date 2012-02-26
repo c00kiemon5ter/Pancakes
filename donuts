@@ -21,9 +21,9 @@ else
     read -r what args <<< "${what}"
 fi
 
-commands=( alone bloat bewbs calc ccc cookies cool echo f fakdat fap fortune
-fu gay gn google help i links list money ping poker problem random rhyme sexy
-slap temp test trap troll umad url yuno )
+commands=( alone bewbs bloat bugs calc ccc cookies cool echo f faith fakdat
+fap fortune fu gay gn google help i links list money ping poker problem
+random rhyme sexy slap test trap troll umad url wtf yuno )
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -43,6 +43,9 @@ case "${what}" in
     bloat)
         who=
         [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
+        ;;
+    bugs)
+        who= sayit "0+2=4 // New Math era! https://bugs.php.net/bug.php?id=61095"
         ;;
     calc)
         args="$(bc -l <<< "${args}")"
@@ -64,6 +67,9 @@ case "${what}" in
         ;;
     f)
         sayit "failed"
+        ;;
+    faith)
+        who= sayit "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
         ;;
     fakdat)
         who= sayit "http://i.imgur.com/SP9gwh.jpg"
@@ -164,6 +170,9 @@ case "${what}" in
         args="$(sed '/youtu\.\?be/s,.*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"
         args="$(curl -s "$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
         newho= who= sayit ":: $tiny - ${args:-"I guess some funny pic of some sort /b/tards"}"
+        ;;
+    wtf)
+        who= sayit "wat? wtf? you haven't read this I guess: http://timecube.com/"
         ;;
     [yY][uU][nN][oO])
         sayit "Y U NO ${args:-y u no?}"
