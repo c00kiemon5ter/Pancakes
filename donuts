@@ -23,7 +23,7 @@ fi
 
 commands=( alone bewbs bloat bugs calc ccc cookies cool echo f faith fakdat
 fap fortune fu gay gn google help i links list money ping poker problem
-random rhyme sexy slap test trap troll umad url wtf yuno )
+random rhyme sexy slap temp test trap troll umad url wtf yuno )
 [[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
 
 case "${what}" in
@@ -145,11 +145,11 @@ case "${what}" in
         who= newho= sayit "$args"
         ;;
     temp)
-        read -r city country _ <<< "${args}"
-        [[ -z "$city" ]] && city="Athens" country="Greece"
-        args="$(curl -s 'http://www.google.com/ig/api?weather='${city}+${country} | sed -r \
-        's:.*city data="(.*)"/><postal.*condition data="(.*)"/><temp_f.*temp_c data="([[:digit:]]+)".*humidity data="(.*%).*:\1 \2 \3\xe2\x84\x83 \4:')"
-        args="$(sed -r 's:.*problem_cause.*:Invalid Input!:' <<< "${args}")"
+        read -r args _ <<< "${args}"
+        [[ -z "$args" ]] && args="Athens"
+        args="$(curl -s "http://www.google.com/ig/api?weather=$args" | iconv -f ISO-8859-15 -t UTF-8 | \
+            sed -n 's,.*<city data="\([^/>]*\)"/>.*temp_c data="\([^>]*\)"/>.*<humidity data="\([^>]*\)"/>.*,\1 * \2°C * \3,p')"
+        [[ -z "$args" ]] && args="where's that herp ?"
         sayit "${args}"
         ;;
     test)
