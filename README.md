@@ -12,7 +12,11 @@ Minimal IRC bot and logger in pure Bash.
 Dependencies
 ------------
 Only deps are Bash shell and coreutils
-(`/bin/{mkdir,mkfifo,rm}`, `/usr/bin/{env,dirname}`)
+(`/bin/{mkdir,mkfifo,rm}`, `/usr/bin/{env,nohup,dirname}`)
+
+run as:
+
+    $ nohup ./pancakes
 
 Test it
 -------
