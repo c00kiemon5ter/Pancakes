@@ -149,7 +149,7 @@ case "${what}" in
         [[ -z "$args" ]] && args="Athens"
         args="$(curl -s "http://www.google.com/ig/api?weather=$args" | iconv -f ISO-8859-15 -t UTF-8 | \
             sed -n 's,.*<city data="\([^/>]*\)"/>.*temp_c data="\([^>]*\)"/>.*<humidity data="\([^>]*\)"/>.*,\1 * \2°C * \3,p')"
-        [[ -z "$args" ]] && args="where's that herp ?"
+        [[ -z "$args" ]] && args="where's that herp ? don't use spaces, use '+'"
         sayit "${args}"
         ;;
     test)
@@ -167,8 +167,9 @@ case "${what}" in
     url)
         args="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"
         tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${args%#*}&format=txt")"
-        args="$(sed '/youtu\.\?be/s,.*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"
-        args="$(curl -s "$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
+        args="$(sed 's,.*youtube\..*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"  # youtube  links
+        args="$(sed 's,.*youtu\.be/\(.\+\),http://www.youtube.com/embed/\1,' <<< "$args")"          # youtu.be links
+        args="$(curl -s "$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"                      # grab title
         newho= who= sayit ":: $tiny - ${args:-"I guess some funny pic of some sort /b/tards"}"
         ;;
     wtf)
