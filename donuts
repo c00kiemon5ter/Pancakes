@@ -165,12 +165,14 @@ case "${what}" in
         sayit "u mad, bro? ${args}"
         ;;
     url)
-        args="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"
-        tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${args%#*}&format=txt")"
-        args="$(sed 's,.*youtube\..*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$args")"  # youtube  links
-        args="$(sed 's,.*youtu\.be/\(.\+\),http://www.youtube.com/embed/\1,' <<< "$args")"          # youtu.be links
-        args="$(curl -s "$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"                      # grab title
-        newho= who= sayit ":: $tiny - ${args:-"I guess some funny pic of some sort /b/tards"}"
+        url="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"                            # grab the url and minify it
+        tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${url%#*}&format=txt")"
+        url="$(sed 's,.*youtube\..*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$url")"  # handle youtube  links
+        url="$(sed 's,.*youtu\.be/\(.\+\),http://www.youtube.com/embed/\1,' <<< "$url")"          # handle youtu.be links
+        ttl="$(curl -s "$url" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"                      # grab the title
+        args=(::); (( ${#url} > 80 )) && args+=($tiny -)                                          # big url ? print mini url
+        args+=("${ttl:-"what's that herp ?"}")                                                    # handle no title
+        newho= who= sayit "${args[@]}"                                                            # print it
         ;;
     wtf)
         who= sayit "wat? wtf? you haven't read this I guess: http://timecube.com/"
