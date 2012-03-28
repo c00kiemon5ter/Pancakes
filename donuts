@@ -28,7 +28,22 @@ problem random rhyme sexy slap temp test trap troll umad url wtf yuno )
 
 case "${what}" in
     JOIN)
-        newho="ACTION" sayit "la presentato le herpino, ${who}"
+        case $RANDOM in
+            0*) newho="ACTION" sayit "la presentato le herpino, ${who}"
+                ;;
+            1*) args="$who" who="" newho="" sayit "yo ${who}"
+                ;;
+            2*) args="$who" who="" newho="" sayit "kalws ton ${who}"
+                ;;
+            3*) args="$who" who="" newho="" sayit "pws ki apo dw ${who}"
+                ;;
+            4*) args="$who" who="" newho="" sayit "pou sai re ${who}"
+                ;;
+            5*) args="$who" who="" newho="" sayit "pws ki apo dw ${who}"
+                ;;
+            *) sayit "pou eisai mwri ?"
+                ;;
+        esac
         ;;
     PART)
         newho="ACTION" sayit "bye herp derp, ${who}"
