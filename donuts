@@ -130,7 +130,7 @@ case "${what}" in
         sayit "all you links are belong to me! https://bitly.com/u/pancakesbot"
         ;;
     list)
-        sayit "${commands[*]}"
+        sayit ", ${commands[*]}"
         ;;
     money)
         if [[ "$args" =~ ^[[:digit:]]+[[:space:]]+[[:alpha:]]+[[:space:]]+[[:alpha:]]+ ]]; then
