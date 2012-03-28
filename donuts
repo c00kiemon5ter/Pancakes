@@ -141,6 +141,12 @@ case "${what}" in
             newho= sayit "invalid input"
         fi
         ;;
+    mb)
+        sayit "multi ? MUTLI BIKINI ! ΧΩΡΟ-ΧΡΟΝΙΚΗ ΔΙΑΣΠΑΣΗ ΤΩΡΑ ! http://www.arpisoft.gr/patents.html + http://arpisoft/mb.pdf"
+        ;;
+    pie)
+        who= sayit "Sigh. Why my pie die? I so hungry. Now I cry. Life is just a lie. X-(  http://bit.ly/9jwK84"
+        ;;
     ping)
         [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
         ;;
@@ -194,6 +200,9 @@ case "${what}" in
         ttl="$(curl -s "$url" | sed -n 's,.*<title>\([^<]*\)</title>.*,\1,p')"                   # grab the title
         (( ${#url} < 80 )) && tiny=""                                                            # small url ? discard tiny
         [[ -n $ttl || -n $tiny ]] && newho= who= sayit ":: $tiny - ${ttl:-"title not found"}"    # print it
+        ;;
+    wat)
+        who= sayit "http://i.imgur.com/zV3Wz.gif :3"
         ;;
     wtf)
         who= sayit "wat? wtf? you haven't read this I guess: http://timecube.com/"
