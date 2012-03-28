@@ -121,7 +121,7 @@ case "${what}" in
             | while read -r _n _r; do sayit "${_n}. ${_r}"; done
         ;;
     help)
-        sayit "help yourself! try !list"
+        sayit "help yourself! or try !list . http://sweet.nodns4.us/"
         ;;
     i)
         who= sayit "oh the irony."
