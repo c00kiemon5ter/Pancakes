@@ -98,7 +98,9 @@ case "${what}" in
         who= sayit "http://i.imgur.com/EPaUf.jpg"
         ;;
     fortune)
-        newho="→" who= sayit "$(/usr/bin/fortune -osea)"
+        while read -r; do
+            newho="→" who= sayit "$REPLY"
+        done < <(/usr/bin/fortune -osea)
         ;;
     [Ff][Uu])
         sayit "fuuuuuuuuu!"
