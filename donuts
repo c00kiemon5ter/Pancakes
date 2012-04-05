@@ -101,7 +101,7 @@ case "${what}" in
     fortune)
         while read -r; do
             newho="→" who= sayit "$REPLY"
-        done < <(/usr/bin/fortune -osea)
+        done < <(fortune -osea)
         ;;
     [Ff][Uu])
         sayit "fuuuuuuuuu!"
