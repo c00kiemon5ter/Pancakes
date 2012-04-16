@@ -28,7 +28,7 @@ declare -A servers
 mkdir -p "${prefix}"
 
 for server in "${!servers[@]}"; do
-    #{
+    {
         mkdir -p "${prefix}/${server}"
         exec {ircfd}<> "${prefix}/${server}/${server}.err" 2>&${ircfd}-
 
@@ -93,6 +93,6 @@ for server in "${!servers[@]}"; do
                 exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | cut -c -255 >&${ircfd} &
             done <&${ircfd}
         } &
-    #} &
+    } &
 done
 
