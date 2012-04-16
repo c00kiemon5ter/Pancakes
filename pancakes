@@ -54,7 +54,7 @@ for server in "${!servers[@]}"; do
 
             mkdir -p "${prefix}/${server}/${channel#\#}"
             fifo="${prefix}/${server}/${channel#\#}/in"
-            mkfifo "${fifo}" || {
+            rm -f "${fifo}" && mkfifo "${fifo}" || {
                 printf -- "error: cannot create fifo: %s\n" "${fifo}"
                 continue
             }
