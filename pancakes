@@ -62,7 +62,7 @@ for server in "${!servers[@]}"; do
             {   exec {fffd}<>"${fifo}"
                 trap 'exec {fffd}>&-; rm -f "${fifo}";' EXIT
 
-                printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
+                printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
 
                 while read -r -u ${fffd}
                 do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}

@@ -30,7 +30,7 @@ wat wtf yuno )
 case "${what}" in
     JOIN)
         case $RANDOM in
-            0*) newho="ACTION" sayit "la presentato le herpino, ${who}"
+            0*) newho="ACTION" sayit "la presentato le herpino, ${who}"
                 ;;
             1*) args="$who" who="" newho="" sayit "yo ${who}"
                 ;;
@@ -47,7 +47,7 @@ case "${what}" in
         esac
         ;;
     PART)
-        newho="ACTION" sayit "bye herp derp, ${who}"
+        newho="ACTION" sayit "bye herp derp, ${who}"
         ;;
     alone)
         sayit "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
@@ -168,7 +168,7 @@ case "${what}" in
         who= sayit "be a man, read the man http://xkcd.com/293/"
         ;;
     sexy)
-        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
+        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
         ;;
     slap)
         [[ -z $newho ]] && newho="his cohones"
