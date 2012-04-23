@@ -159,7 +159,7 @@ case "${what}" in
         ;;
     rhyme)
         [[ -z "${args}" ]] && sayit "hit me, aw, I feel no pain, agh" && return
-        mapfile -t args < <(curl -s http://uberspot.ath.cx/rhymefinder/ -F "word=${args}" | \
+        mapfile -t args < <(curl -s http://cypher.dontexist.net/rhymefinder/ -F "word=${args}" | \
             sed -n -e '/textarea name="results"/s:.*>\(.*\):\1:' -e 's: | :\n:gp')
         (( ${#args[@]} )) && who= sayit "${args[RANDOM%${#args[@]}]}" \
                           || sayit "oh, this hurts bro, I cant rhyme with yo word'"
