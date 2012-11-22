@@ -28,8 +28,8 @@ fi
 commands=(
     bloat bugs calc cookies isup echo faith
     fortune google help/list links money
-    ping/test random word news rtfm meme
-    sexy slap url yuno
+    ping/test random pbin news rtfm meme
+    sexy slap url yuno r/rhyme
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -185,13 +185,27 @@ case "${cmd}" in
             newho= sayit "invalid input"
         fi
         ;;
-    word)
-        [[ -z "${mesg}" ]] && sayit "what's the word, daug ?" && return
-        mesg=( $(grep "${mesg}$" < <(iconv -f ISO8859-7 -t utf8 /usr/share/hunspell/el_GR.dic /usr/share/hunspell/en_US.dic)) )
-        if (( ${#mesg[@]} ))
-        then who= sayit "${mesg[RANDOM%${#mesg[@]}]}"
-        else sayit "oh, this hurts bro, I cant rhyme with yo word'"
-        fi
+    pbin)
+        unset who && sayit "http://sprunge.us/  http://ideone.com  http://codepad.org/  http://dpaste.com"
+        ;;
+    dict)
+        unset who
+        readonly api='http://glosbe.com/gapi/translate?'
+        read -r word _ <<< "$mesg"
+        curl -s "${api}from=${from:-"eng"}&dest=${to:-"eng"}&format=json&phrase=${word}&pretty=true" | \
+            awk -F"[\"\"]" -vw="$word" '$2 == "text" { if ($4 != w) print $4; if (++i == 10) { exit } }' | \
+            while read -r
+            do sayit "· $REPLY"
+            done
+        ;;
+    r|rhyme)
+        words=( $(awk '{ for (i=1; i<=NF; i++) if ($i ~ /[*]/) print $i }' <<< "${mesg}") )
+        for word in "${words[@]}"; do
+            word="$(tr -cd "*[α-ωΑ-Ω][:alnum:]" <<< "$word")"
+            r=( $(grep -h "^${word//[*]/.*}$" /usr/share/hunspell/en_US.dic <(iconv -f ISO8859-7 -t UTF8 /usr/share/hunspell/el_GR.dic)) )
+            (( !$? )) && mesg="$(sed "s/${word//[*]/[*]}/${r[RANDOM%${#r[@]}]}/" <<< "$mesg")"
+        done
+        sayit "${mesg:-"what's the line punk?"}"
         ;;
     rtfm)
         unset who && sayit "be a man, read the man http://xkcd.com/293/"
