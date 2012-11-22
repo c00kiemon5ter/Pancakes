@@ -2,17 +2,17 @@
 # writen by Ivan c00kiemon5ter Kanakarakis ~ <ivan.kanak[at]gmail.com>
 
 path="$(dirname "$0")"
-sugar="${path}/sugar.conf"
-donuts="${path}/donuts"
+conf="${path}/sugar.conf"
+cmds="${path}/donuts"
 
 declare -A servers
 
-[[ -r "${sugar}" ]] && source "${sugar}" ||  {
-    printf -- "error: cannot read configuration: %s\n" "${sugar}"
+[[ -r "${conf}" ]] && source "${conf}" ||  {
+    printf -- "error: cannot read configuration: %s\n" "${conf}"
     exit 1
 }
-[[ -r "${donuts}" ]] || {
-    printf -- "error: cannot read commands: %s\n" "${donuts}"
+[[ -r "${cmds}" ]] || {
+    printf -- "error: cannot read commands: %s\n" "${cmds}"
     exit 1
 }
 
@@ -81,16 +81,16 @@ for server in "${!servers[@]}"; do
                 set -- ${REPLY//$'\r'/}
                 [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
 
-                read -r who did where what <<< "${REPLY%}"
-                {  [[ "${did}" == "PART" ]] && what=':!PART'; } || \
-                {  [[ "${did}" == "JOIN" ]] && what=':!JOIN'; } || \
-                   [[ "${did}" == "PRIVMSG" ]] || continue
+                read -r nick action chan mesg <<< "${REPLY%}"
+                {  [[ "${action}" == "PART" ]] && mesg=':!PART'; } || \
+                {  [[ "${action}" == "JOIN" ]] && mesg=':!JOIN'; } || \
+                   [[ "${action}" == "PRIVMSG" ]] || continue
 
-                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${where#*\#}/$(date +"%F").log"
+                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${chan#*\#}/$(date +"%F").log"
 
-                [[ "${what}" =~ ^[^\!]*https?:// ]] && what=':!'"${what/#:/url }" # pick up urls and send a !url cmd if not a commant ^!
-                [[ "${who%\!*}" != ":${nickname}" && "${what}" =~ ^:\!.+ ]] || continue
-                exec "${donuts}" "${what#:\!}" "${where#:}" "${who#:}" "${nickname}" | cut -c -255 >&${ircfd} &
+                [[ "${mesg}" =~ ^[^\!]*https?:// ]] && mesg=':!'"${mesg/#:/url }" # pick up urls and send a !url cmd if not a commant ^!
+                [[ "${nick%\!*}" != ":${nickname}" && "${mesg}" =~ ^:\!.+ ]] || continue
+                exec "${cmds}" "${mesg#:\!}" "${chan#:}" "${nick#:}" "${nickname}" | cut -c -255 >&${ircfd} &
             done <&${ircfd}
         } &
     } &
