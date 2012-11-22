@@ -1,222 +1,229 @@
 #!/usr/bin/env bash
 
-what="$1"
-where="$2"
+cmd="$1"
 who="${3%\!*}"
 whoami="$4"
-op="$USER"
+
+readonly chan="$2"
+readonly oper="$USER"
 
 sayit() {
-    printf -- "PRIVMSG %s :%s %s\n" "${where}" "${newho:-${who}}" "$*"
+    if [[ -n "${newho:-${who}}" ]]
+    then printf -- "PRIVMSG %s :%s: %s\n" "${chan}" "${newho:-${who}}" "${*}"
+    else printf -- "PRIVMSG %s :%s\n" "${chan}" "${*}"
+    fi
 }
 
-if [[ "${what}" =~ ^[[:alnum:]]+\ *\>\ *[[:alnum:]_-]+ ]]; then
-    IFS=\>${IFS} read -r what args  <<< "${what}"
-                 read -r newho args <<< "${args}"
-elif [[ "${what}" =~ [[:alnum:]]+\ *\>\ *[[:alnum:]_-]+$ ]]; then
-    IFS=\> read -r args newho <<< "${what}"
-           read -r what args  <<< "${args}"
+if [[ "${cmd}" =~ ^[[:alnum:]]+[[:space:]]*\>[[:space:]]*[[:alnum:]_-]+ ]]; then
+    IFS=\>${IFS} read -r cmd mesg   <<< "${cmd}"
+                 read -r newho mesg <<< "${mesg}"
+elif [[ "${cmd}" =~ [[:alnum:]]+[[:space:]]*\>[[:space:]]*[[:alnum:]_-]+$ ]]; then
+    IFS=\> read -r mesg newho <<< "${cmd}"
+           read -r cmd mesg   <<< "${mesg}"
            read -r newho      <<< "${newho}"
 else
-    read -r what args <<< "${what}"
+    read -r cmd mesg <<< "${cmd}"
 fi
 
-commands=( alone bewbs bloat bugs calc ccc cookies cool down echo f faith
-fakdat fap fortune fu gay gn google help i links list money mb pie ping
-poker problem random rhyme rtfm sexy slap temp test trap troll umad url
-wat wtf yuno )
-[[ "${what}" == random ]] && what="${commands[RANDOM%${#commands[@]}]}"
+commands=(
+    bloat bugs calc cookies down/up echo faith fortune
+    google help/list links money ping/test random word
+    rtfm meme sexy slap temp url yuno
+)
 
-case "${what}" in
+[[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
+
+case "${cmd}" in
     JOIN)
-        case $RANDOM in
-            0*) newho="ACTION" sayit "la presentato le herpino, ${who}"
-                ;;
-            1*) args="$who" who="" newho="" sayit "yo ${who}"
-                ;;
-            2*) args="$who" who="" newho="" sayit "kalws ton ${who}"
-                ;;
-            3*) args="$who" who="" newho="" sayit "pws ki apo dw ${who}"
-                ;;
-            4*) args="$who" who="" newho="" sayit "pou sai re ${who}"
-                ;;
-            5*) args="$who" who="" newho="" sayit "pws ki apo dw ${who}"
-                ;;
-            *) sayit "pou eisai mwri ?"
-                ;;
-        esac
+        messages=(
+            "la presentato le herpino, ${who}"
+            "yo ${who}"
+            "kalws ton ${who}"
+            "pws ki apo dw ${who}"
+            "pou sai re ${who}"
+            "pou eisai mwri ${who} ?"
+            "lol, ${who} - yolo yolo yolo!"
+        )
+        unset who newho
+        if [[ "${who}" == "${oper}" ]]
+        then sayit "EGERTHEITW!"
+        else sayit "${messages[RANDOM%${#messages[@]}]}"
+        fi
         ;;
     PART)
-        newho="ACTION" sayit "bye herp derp, ${who}"
-        ;;
-    alone)
-        sayit "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
-        ;;
-    bewbs)
-        newho= who=
-        [[ "${args}" == "moar" ]] && sayit "(  @  )(  @  )" || sayit "( . )( . )"
+        messages=(
+            "bye herp derp, ${who}"
+            "yolo ${who}"
+            "tsagia ${who}"
+            "antios ${who}"
+            "ta leme re ${who}"
+            "antio mwri ${who} ?"
+            "gn ${who} - pr0n addict!"
+        )
+        unset who newho
+        if [[ "${who}" == "${oper}" ]]
+        then sayit "TA SEVOI MOY!"
+        else sayit "${messages[RANDOM%${#messages[@]}]}"
+        fi
         ;;
     bloat)
-        who=
-        [[ -n "${args}" ]] && sayit "${args} is bloat!" || sayit "bloat is bloat!"
+        unset who
+        if [[ -n "${mesg}" ]]
+        then sayit "${mesg} is bloat!"
+        else sayit "bloat is bloat!"
+        fi
         ;;
     bugs)
-        who= sayit "0+2=4 // New Math era! https://bugs.php.net/bug.php?id=61095"
+        unset who && sayit "0+2=4 // New Math era! https://bugs.php.net/bug.php?id=61095"
         ;;
     calc)
-        args="$(bc -l <<< "${args}")"
-        [[ -z "${args}" ]] && sayit "err, ..no" || sayit "${args}"
-        ;;
-    ccc)
-        newho= who= sayit "cococo-co-combobreaker!"
+        mesg="$(bc -l <<< "${mesg}")"
+        if [[ -z "${mesg}" ]]
+        then sayit "err, ..no"
+        else sayit "${mesg}"
+        fi
         ;;
     cookies)
-        [[ "${who}" == "${op}" ]] \
-            && sayit "om nom nom nom nom nom nom nom nom nom" \
-            || sayit "bake em'"
+        if [[ "${who}" == "${oper}" ]]
+        then sayit "om nom nom nom nom nom nom nom nom nom"
+        else sayit "bake em' for master ${oper}"
+        fi
         ;;
-    cool)
-        who= sayit "cool.story.bro."
+    meme)
+        unset who
+        messages=(
+            "multi ? MUTLI BIKINI ! ΧΩΡΟ-ΧΡΟΝΙΚΗ ΔΙΑΣΠΑΣΗ ΤΩΡΑ ! http://www.arpisoft.gr/patents.html + http://arpisoft/mb.pdf"
+            "Sigh. Why my pie die? I so hungry. Now I cry. Life is just a lie. X-(  http://bit.ly/9jwK84"
+            "wat? wtf? you haven't read this I guess: http://timecube.com/"
+            "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
+            "forever aloooone! http://i.imgur.com/xr7Kl.jpg"
+            "ULTRAgaaaay http://i.imgur.com/XJ4Aq.png"
+            "http://i.imgur.com/SP9gwh.jpg"
+            "http://i.imgur.com/EPaUf.jpg"
+            "http://i.imgur.com/zV3Wz.gif :3"
+            'http://i.imgur.com/pKttU.jpg'
+            "trololololololololololololo"
+            "u mad, bro? ${mesg}"
+            "problem, ${mesg}?"
+            "cool.story.bro."
+            "failed"
+        )
+        sayit "${messages[RANDOM%${#messages[@]}]}"
         ;;
-    down)
-        args="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"
-        args="$(curl -s "http://www.downforeveryoneorjustme.com/$args" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
-        sayit "→ $args"
+    down|up)
+        mesg="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$mesg")"
+        mesg="$(curl -s "http://www.downforeveryoneorjustme.com/$mesg" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
+        sayit "→ $mesg"
         ;;
     echo)
-        who= sayit "$args"
-        ;;
-    f)
-        sayit "failed"
+        unset who && sayit "$mesg"
         ;;
     faith)
-        who= sayit "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
-        ;;
-    fakdat)
-        who= sayit "http://i.imgur.com/SP9gwh.jpg"
-        ;;
-    fap)
-        who= sayit "http://i.imgur.com/EPaUf.jpg"
+        unset who
+        sayit "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
         ;;
     fortune)
-        while read -r; do
-            newho="→" who= sayit "$REPLY"
+        while read -r
+        do newho="→" who= sayit "$REPLY"
         done < <(fortune -osea)
         ;;
     [Ff][Uu])
-        sayit "fuuuuuuuuu!"
-        ;;
-    gay)
-        who= sayit "ULTRAgaaaay http://i.imgur.com/XJ4Aq.png"
+        sayit "fffuuuuuuuuuuuuuuuuuuuuu !!!!!!! >:("
         ;;
     gn)
-        [[ -n "${newho}" ]] && sayit "sleep tight you weak! ${args}" \
-                            || who= sayit "sleep is for the weak."
+        if [[ -z "${newho}" ]]
+        then who= sayit "sleep is for the weak."
+        else sayit "sleep tight you weak! ${mesg}"
+        fi
         ;;
     google)
-        who= api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
-        curl -s --get --data-urlencode "q=${args// /+}" ${api}          \
-            | sed 's/{\|,/&\n/g'                                        \
-            | sed -n '/unescapedUrl/s/"unescapedUrl":"\(.\+\)".*/\1/p'  \
-            | cat -n                                                    \
-            | while read -r _n _r; do sayit "${_n}. ${_r}"; done
+        unset who
+        readonly api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
+        results=(
+            $(curl -s --get --data-urlencode "q=${mesg// /+}" "${api}" | \
+            awk -F"[\"\"]" '{ for (i=2; i<=NF; i+=2) if ($i == "unescapedUrl") print $(i+=2) }')
+        )
+        for i in "${!results[@]}"
+        do sayit "${i}. ${results[i]}"
+        done
         ;;
-    help)
-        sayit "help yourself! or try !list . http://sweet.nodns4.us/"
-        ;;
-    i)
-        who= sayit "oh the irony."
+    help|list)
+        sayit "help yourself! http://sweet.nodns4.us/"
+        sayit "${commands[*]}"
         ;;
     links)
         sayit "all you links are belong to me! https://bitly.com/u/pancakesbot"
         ;;
-    list)
-        sayit ", ${commands[*]}"
-        ;;
     money)
-        if [[ "$args" =~ ^[[:digit:]]+[[:space:]]+[[:alpha:]]+[[:space:]]+[[:alpha:]]+ ]]; then
-            read n f t _ <<< "${args}"
-            args="$(curl -s 'http://www.google.com/ig/calculator?hl=en&q='${n}${f}=?${t} | sed -r 's/.*"(.+)",.*"(.+)",.*".*/\1 → \2/')"
-            [[ "${args}" =~ ^\{ ]] && newho= sayit "no such unit" || sayit "${args}"
+        unset who newho
+        if [[ "$mesg" =~ ^[[:digit:]]+[[:space:]]+[[:alpha:]]+[[:space:]]+[[:alpha:]]+ ]]; then
+            read n f t _ <<< "${mesg}"
+            mesg="$(curl -s 'http://www.google.com/ig/calculator?hl=en&q='${n}${f}=?${t} \
+                | awk -F"[\"\"]" '$2 { printf("%s is %s\n",$2,$4) }')"
+            if [[ -z "${mesg}" ]]
+            then sayit "no such unit"
+            else sayit "${mesg}"
+            fi
         else
             newho= sayit "invalid input"
         fi
         ;;
-    mb)
-        sayit "multi ? MUTLI BIKINI ! ΧΩΡΟ-ΧΡΟΝΙΚΗ ΔΙΑΣΠΑΣΗ ΤΩΡΑ ! http://www.arpisoft.gr/patents.html + http://arpisoft/mb.pdf"
-        ;;
-    pie)
-        who= sayit "Sigh. Why my pie die? I so hungry. Now I cry. Life is just a lie. X-(  http://bit.ly/9jwK84"
-        ;;
-    ping)
-        [[ -n "${newho}" ]] && sayit "ping!" || sayit "pong!"
-        ;;
-    poker)
-        sayit 'http://i.imgur.com/pKttU.jpg'
-        ;;
-    problem)
-        who= sayit "problem, ${args}?"
-        ;;
-    rhyme)
-        [[ -z "${args}" ]] && sayit "hit me, aw, I feel no pain, agh" && return
-        mapfile -t args < <(curl -s http://cypher.dontexist.net/rhymefinder/ -F "word=${args}" | \
-            sed -n -e '/textarea name="results"/s:.*>\(.*\):\1:' -e 's: | :\n:gp')
-        (( ${#args[@]} )) && who= sayit "${args[RANDOM%${#args[@]}]}" \
-                          || sayit "oh, this hurts bro, I cant rhyme with yo word'"
+    word)
+        [[ -z "${mesg}" ]] && sayit "what's the word, daug ?" && return
+        mesg=( $(grep "${mesg}$" < <(iconv -f ISO8859-7 -t utf8 /usr/share/hunspell/el_GR.dic /usr/share/hunspell/en_US.dic)) )
+        if (( ${#mesg[@]} ))
+        then who= sayit "${mesg[RANDOM%${#mesg[@]}]}"
+        else sayit "oh, this hurts bro, I cant rhyme with yo word'"
+        fi
         ;;
     rtfm)
-        who= sayit "be a man, read the man http://xkcd.com/293/"
+        unset who && sayit "be a man, read the man http://xkcd.com/293/"
         ;;
     sexy)
-        who="ACTION ${who}" sayit "le sexy time <3 ${args}"
+        sayit "le sexy time <3 ${mesg}"
         ;;
     slap)
-        [[ -z $newho ]] && newho="his cohones"
-        [[ -z $args ]] && args="$who slaps $newho with a large smelly tuna fish" \
-                       || args="$who slaps $newho with a large $args"
-        who= newho= sayit "$args"
+        sayit "${who} slaps ${newho:-"his cohones"} with a large ${mesg:-"smelly potato donut"}"
         ;;
-    temp)
-        read -r args _ <<< "${args}"
-        [[ -z "$args" ]] && args="Athens"
-        args="$(curl -s "http://www.google.com/ig/api?weather=$args" | iconv -f ISO-8859-15 -t UTF-8 | \
-            sed -n 's,.*<city data="\([^/>]*\)"/>.*temp_c data="\([^>]*\)"/>.*<humidity data="\([^>]*\)"/>.*,\1 * \2°C * \3,p')"
-        [[ -z "$args" ]] && args="where's that herp ? don't use spaces, use '+'"
-        sayit "${args}"
-        ;;
-    test)
-        sayit "tost ready!"
-        ;;
-    trap)
-        who= sayit "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
-        ;;
-    troll)
-        sayit "trololololololololololololo"
-        ;;
-    umad)
-        sayit "u mad, bro? ${args}"
+    ping|test)
+        if [[ -z "${newho}" ]]
+        then sayit "tost ready!"
+        else sayit "ping!"
+        fi
         ;;
     url)
-        url="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$args")"                           # grab the url and minify it
-        tiny="$(curl -s "http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl=${url%#*}&format=txt")"
-        url="$(sed 's,.*youtube\..*v=\([^&]\+\).*,http://www.youtube.com/embed/\1,' <<< "$url")" # handle youtube  links
-        url="$(sed 's,.*youtu\.be/\(.\+\),http://www.youtube.com/embed/\1,' <<< "$url")"         # handle youtu.be links
-        ttl="$(curl -s "$url" | sed -n 's,.*<title>\([^<]*\)</title>.*,\1,p')"                   # grab the title
-        (( ${#url} < 80 )) && tiny=""                                                            # small url ? discard tiny
-        [[ -n $ttl || -n $tiny ]] && newho= who= sayit ":: $tiny - ${ttl:-"title not found"}"    # print it
-        ;;
-    wat)
-        who= sayit "http://i.imgur.com/zV3Wz.gif :3"
-        ;;
-    wtf)
-        who= sayit "wat? wtf? you haven't read this I guess: http://timecube.com/"
+        unset who newho
+        readonly api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
+        urls=( $(awk '{ for (i=1; i<=NF; i++) if ($i ~ /^http/) print $i }' <<< "$mesg") )
+        for url in "${urls[@]}"; do
+            # minify link if needed
+            (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}&format=txt")"
+            # get link title
+            if [[ "${url}" =~ ^http://youtu\.?be ]]
+            then url="${url##*v=}" url="http://www.youtube.com/embed/${url%%&*}"
+            fi
+            title="$(curl -s "${url}" | awk -F"[<>]" 'tolower($2) == "title" { print $3 }')"
+            # we're done
+            sayit "${tiny} -- ${title:-"no title found"}"
+        done
         ;;
     [yY][uU][nN][oO])
-        sayit "Y U NO ${args:-y u no?}"
+        sayit "Y U NO ${mesg:-y u no?}"
         ;;
     *)
-        #newho= sayit "you don't know what you're talking about, do you?"
-        newho= sayit "NO, YOU $what $args"
+        messages=(
+            "you don't know what you're talking about, do you?"
+            "NO, YOU ${cmd} ${mesg}"
+            "apo ta lathi mathainoume, tekna mou"
+            "are you a midget, ${who} ?"
+            "no faggots here, ${who}"
+            "are you tryning to fool me ? are you trying to fool ${whoami} ?"
+        )
+        unset newho
+        if [[ "${who}" == "${oper}" ]]
+        then who= sayit "ESFALA ARXONTA!"
+        else sayit "${messages[RANDOM%${#messages[@]}]}"
+        fi
         ;;
 esac
 
