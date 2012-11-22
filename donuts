@@ -26,9 +26,10 @@ else
 fi
 
 commands=(
-    bloat bugs calc cookies down/up echo faith fortune
-    google help/list links money ping/test random word
-    news rtfm meme sexy slap url yuno
+    bloat bugs calc cookies isup echo faith
+    fortune google help/list links money
+    ping/test random word news rtfm meme
+    sexy slap url yuno
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -44,10 +45,9 @@ case "${cmd}" in
             "pou eisai mwri ${who} ?"
             "lol, ${who} - yolo yolo yolo!"
         )
-        unset who newho
         if [[ "${who}" == "${oper}" ]]
-        then sayit "EGERTHEITW!"
-        else sayit "${messages[RANDOM%${#messages[@]}]}"
+        then who= newho= sayit "EGERTHEITW!"
+        else who= newho= sayit "${messages[RANDOM%${#messages[@]}]}"
         fi
         ;;
     PART)
@@ -60,10 +60,9 @@ case "${cmd}" in
             "antio mwri ${who} ?"
             "gn ${who} - pr0n addict!"
         )
-        unset who newho
         if [[ "${who}" == "${oper}" ]]
-        then sayit "TA SEVOI MOY!"
-        else sayit "${messages[RANDOM%${#messages[@]}]}"
+        then who= newho= sayit "TA SEVOI MOY!"
+        else who= newho= sayit "${messages[RANDOM%${#messages[@]}]}"
         fi
         ;;
     bloat)
@@ -110,10 +109,15 @@ case "${cmd}" in
         )
         sayit "${messages[RANDOM%${#messages[@]}]}"
         ;;
-    down|up)
-        mesg="$(sed 's,.*\(http://[^[:space:]]\+\).*,\1,' <<< "$mesg")"
-        mesg="$(curl -s "http://www.downforeveryoneorjustme.com/$mesg" | sed -n 's,.*<title>\(.\+\)</title>.*,\1,p')"
-        sayit "→ $mesg"
+    isitup)
+        awk '{ for (i=1; i<=NF; i++)
+        if ($i ~ /^http/) print substr($i, index($i, "://") + 3)
+        else if ($i ~ /^www/) print $i
+        }' <<< "$mesg" | \
+            while read -r site; do
+                sayit "$(curl -s "http://isitup.org/${site}" | \
+                    awk -F"[<>]" '{ for (i=1; i<=NF; i++) if(tolower($i) == "title") { print $(i+1); exit } }')"
+            done
         ;;
     echo)
         unset who && sayit "$mesg"
@@ -123,8 +127,9 @@ case "${cmd}" in
         sayit "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
         ;;
     fortune)
+        unset who newho
         while read -r
-        do newho="→" who= sayit "$REPLY"
+        do sayit "$REPLY"
         done < <(fortune -osea)
         ;;
     [Ff][Uu])
@@ -139,13 +144,11 @@ case "${cmd}" in
     google)
         unset who
         readonly api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
-        results=(
-            $(curl -s --get --data-urlencode "q=${mesg// /+}" "${api}" | \
-            awk -F"[\"\"]" '{ for (i=2; i<=NF; i+=2) if ($i == "unescapedUrl") print $(i+=2) }')
-        )
-        for i in "${!results[@]}"
-        do sayit "${i}. ${results[i]}"
-        done
+        curl -s --get --data-urlencode "q=${mesg// /+}" "${api}"                                | \
+            awk -F"[\"\"]" '{ for (i=2; i<=NF; i+=2) if ($i == "unescapedUrl") print $(i+=2) }' | \
+            while read -r
+            do sayit "· $REPLY"
+            done
         ;;
     news)
         unset who
@@ -208,21 +211,21 @@ case "${cmd}" in
     url)
         unset who newho
         readonly api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
-        urls=( $(awk '{ for (i=1; i<=NF; i++) if ($i ~ /^http/) print $i }' <<< "$mesg") )
-        for url in "${urls[@]}"; do
-            # minify link if needed
-            (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}&format=txt")"
-            # get link title
-            if [[ "${url}" =~ ^http://youtu\.?be ]]
-            then url="${url##*v=}" url="http://www.youtube.com/embed/${url%%&*}"
-            fi
-            title="$(curl -s "${url}" | awk -F"[<>]" 'tolower($2) == "title" { print $3 }')"
-            # we're done
-            sayit "${tiny} -- ${title:-"no title found"}"
-        done
+        awk '{ for (i=1; i<=NF; i++) if ($i ~ /^http/) print $i }' <<< "$mesg" | \
+            while read -r url; do
+                # minify link if needed
+                (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}&format=txt")"
+                # get link title
+                if [[ "${url}" =~ ^http://(www\.)youtu\.?be ]]
+                then url="${url##*v=}" url="http://www.youtube.com/embed/${url%%&*}"
+                fi
+                title="$(curl -s "${url}" | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if(tolower($i) ~ /title( .+)?/) { print $(i+1); exit } }')"
+                # we're done
+                [[ -n "${title}" || -n "${tiny}" ]] && sayit "${tiny} -- ${title:-"no title found"}"
+            done
         ;;
     [yY][uU][nN][oO])
-        sayit "Y U NO ${mesg:-y u no?}"
+        sayit "Y U NO ${mesg:-"y u no?"}"
         ;;
     *)
         messages=(
