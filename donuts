@@ -28,7 +28,7 @@ fi
 commands=(
     bloat bugs calc cookies down/up echo faith fortune
     google help/list links money ping/test random word
-    rtfm meme sexy slap temp url yuno
+    news rtfm meme sexy slap url yuno
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -146,6 +146,20 @@ case "${cmd}" in
         for i in "${!results[@]}"
         do sayit "${i}. ${results[i]}"
         done
+        ;;
+    news)
+        unset who
+        readonly napi='http://www.google.com/ig/api?news'
+        readonly tapi='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
+        curl -s "${napi}" | awk -F"[<=>\"\"]" '{
+        for (f=40; f<=NF; f++)
+            if ($f == "title data") a[i++]=$(f+=2)
+            else if ($f == "url data") a[i++]=$(f+=2)
+        } END { for (i=0; i<=length(a)/2; i+=2) printf("%s - %s\n",a[i+1],a[i]) }' | \
+            while read -r url title; do
+                tiny="$(curl -s "${tapi}${url}&format=txt")"
+                sayit "${tiny:-"$url"} ${title:-"no title found"}"
+            done
         ;;
     help|list)
         sayit "help yourself! http://sweet.nodns4.us/"
