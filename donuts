@@ -201,7 +201,7 @@ case "${cmd}" in
     r|rhyme)
         words=( $(awk '{ for (i=1; i<=NF; i++) if ($i ~ /[*]/) print $i }' <<< "${mesg}") )
         for word in "${words[@]}"; do
-            word="$(tr -cd "*[α-ωΑ-Ω][:alnum:]" <<< "$word")"
+            word="$(tr -cd "*αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ[:alnum:]" <<< "$word")"
             r=( $(grep -h "^${word//[*]/.*}$" /usr/share/hunspell/en_US.dic <(iconv -f ISO8859-7 -t UTF8 /usr/share/hunspell/el_GR.dic)) )
             (( !$? )) && mesg="$(sed "s/${word//[*]/[*]}/${r[RANDOM%${#r[@]}]}/" <<< "$mesg")"
         done
