@@ -199,12 +199,11 @@ case "${cmd}" in
             done
         ;;
     r|rhyme)
-        words=( $(awk '{ for (i=1; i<=NF; i++) if ($i ~ /[*]/) print $i }' <<< "${mesg}") )
-        for word in "${words[@]}"; do
+        while read -r word; do
             word="$(tr -cd "*αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ[:alnum:]" <<< "$word")"
-            r=( $(grep -h "^${word//[*]/.*}$" /usr/share/hunspell/en_US.dic <(iconv -f ISO8859-7 -t UTF8 /usr/share/hunspell/el_GR.dic)) )
+            r=( $(grep -h "^${word//[*]/[^/]*}$" /usr/share/hunspell/en_US.dic <(iconv -f ISO8859-7 -t UTF8 /usr/share/hunspell/el_GR.dic)) )
             (( !$? )) && mesg="$(sed "s/${word//[*]/[*]}/${r[RANDOM%${#r[@]}]}/" <<< "$mesg")"
-        done
+        done < <(awk '{ for (i=1; i<=NF; i++) if ($i ~ /[*]/) print $i }' <<< "${mesg}")
         sayit "${mesg:-"what's the line punk?"}"
         ;;
     rtfm)
