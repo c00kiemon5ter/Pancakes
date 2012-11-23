@@ -217,9 +217,6 @@ case "${cmd}" in
             # minify link if needed
             (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}&format=txt")"
             # get link title
-            if [[ "${url}" =~ ^http://(www\.)youtu\.?be ]]
-            then url="${url##*v=}" url="http://www.youtube.com/embed/${url%%&*}"
-            fi
             title="$(curl -s "${url}" | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if(tolower($i) ~ /title( .+)?/) { print $(i+1); exit } }')"
             # we're done
             [[ -n "${title}" || -n "${tiny}" ]] && sayit "${tiny} -- ${title:-"no title found"}"
