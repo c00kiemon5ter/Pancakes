@@ -58,7 +58,7 @@ case "${cmd}" in
             "tsagia ${who}"
             "antios ${who}"
             "ta leme re ${who}"
-            "antio mwri ${who} ?"
+            "antio mwri ${who}"
             "gn ${who} - pr0n addict!"
         )
         if [[ "${who}" == "${oper}" ]]
