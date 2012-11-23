@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 cmd="$1"
+chan="$2"
 who="${3%\!*}"
 whoami="$4"
-
-readonly chan="$2"
 readonly oper="$USER"
 
 sayit() {
@@ -13,6 +12,8 @@ sayit() {
     else printf -- "PRIVMSG %s :%s\n" "${chan}" "${*}"
     fi
 }
+
+[[ "$chan" == "$whoami" ]] && chan="$who"
 
 if [[ "${cmd}" =~ ^[[:alnum:]]+[[:space:]]*\>[[:space:]]*[[:alnum:]_-]+ ]]; then
     IFS=\>${IFS} read -r cmd mesg   <<< "${cmd}"
