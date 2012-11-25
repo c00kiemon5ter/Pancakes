@@ -129,7 +129,7 @@ case "${cmd}" in
         unset who newho && while read -r; do sayit "$REPLY"; done < <(fortune -osea)
         ;;
     [Ff][Uu])
-        sayit "fffuuuuuuuuuuuuuuuuuuuuu !!!!!!! >:( ${mesg}"
+        unset who && sayit "fffuuuuuuuuuuuuuuuuuuuuu !!!!!!! >:( ${mesg}"
         ;;
     gn)
         [[ -z "${newho}" ]] && who= sayit "sleep is for the weak." || sayit "sleep tight you weak! ${mesg}"
