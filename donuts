@@ -212,10 +212,10 @@ case "${cmd}" in
         ;;
     url)
         unset who newho
-        readonly api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
+        readonly api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&format=txt&longUrl='
         while read -r url; do
             # minify link if needed
-            (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}&format=txt")"
+            (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}")"
             # get link title
             title="$(curl -s "${url}" | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if (tolower($i) ~ /^title( .+)?/) { print $(i+1); exit } }')"
             # we're done
