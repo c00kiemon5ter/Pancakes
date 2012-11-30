@@ -237,15 +237,18 @@ case "${cmd}" in
     pm)
         if [[ -z ${newho} && -z ${mesg} ]]
         then # no mesg - read your personal messages
-            while read -r receiver sender date time mesg
-            do [[ "${receiver}" == "${who}" ]] && chan="${who}" sayit "${date} ${time} <${sender}> ${mesg}"
+            n=0 && while read -r receiver sender date time mesg
+            do [[ "${receiver}" == "${who}" ]] && ((++n)) && sayit "${date} ${time} <${sender}> ${mesg}"
             done < "${notes}"
-            printf '%s\n' "g/^${who} /d" "wq" | ed "${notes}"
+            if (( n ))
+            then printf '%s\n' "g/^${who} /d" "wq" | ed -s "${notes}"
+            else sayit "no messages for you but have this http://i.imgur.com/ecvh7.jpg"
+            fi
         else # leave a personal message
             [[ -z "${newho}" ]] && sayit "pm who ?" && exit
             [[ -z "${mesg}" ]] && sayit "pm what ?" && exit
             # format: 'receiver sender date time mesg' single space in between fields
-            printf -- "%s %s %s %s\n" "${newho}" "${who}" "$(date +"%F %R")" "${mesg}" >> "${notes}" && newho= sayit "noted"
+            printf -- "%s %s %s %s\n" "${newho}" "${who}" "$(date +"%F %T")" "${mesg}" >> "${notes}" && newho= sayit "noted"
         fi
         ;;
     dbt)
