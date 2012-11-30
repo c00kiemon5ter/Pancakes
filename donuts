@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cmd="$1"
+mesg="$1"
 chan="$2"
 who="${3%\!*}"
 whoami="$4"
@@ -16,15 +16,20 @@ sayit() {
 
 [[ "$chan" == "$whoami" ]] && chan="$who"
 
-if [[ "${cmd}" =~ ^[[:alnum:]]+[[:space:]]*\>[[:space:]]*[[:alnum:]_-]+ ]]; then
-    IFS=\>${IFS} read -r cmd mesg   <<< "${cmd}"
+# nickname   =  ( letter / special ) *8( letter / digit / special / "-" )
+# letter     =  %x41-5A / %x61-7A   ; A-Z / a-z
+# special    =  %x5B-60 / %x7B-7D   ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
+# digit      =  %x30-39             ; 0-9
+readonly nickfmt="([]\\\`_^{|}[:alpha:]])([]\\\`_^{|}[:alnum:]])*"
+if [[ "${mesg}" =~ ^[[:alpha:]]+[[:space:]]*\>[[:space:]]*${nickfmt} ]]; then
+    IFS=\>${IFS} read -r cmd mesg   <<< "${mesg}"
                  read -r newho mesg <<< "${mesg}"
-elif [[ "${cmd}" =~ [[:alnum:]]+[[:space:]]*\>[[:space:]]*[[:alnum:]_-]+$ ]]; then
-    IFS=\> read -r mesg newho <<< "${cmd}"
+elif [[ "${mesg}" =~ [[:alnum:]]+[[:space:]]*\>[[:space:]]*${nickfmt}$ ]]; then
+    IFS=\> read -r mesg newho <<< "${mesg}"
            read -r cmd mesg   <<< "${mesg}"
            read -r newho      <<< "${newho}"
 else
-    read -r cmd mesg <<< "${cmd}"
+    read -r cmd mesg <<< "${mesg}"
 fi
 
 commands=(
