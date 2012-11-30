@@ -5,6 +5,7 @@ chan="$2"
 who="${3%\!*}"
 whoami="$4"
 readonly oper="$USER"
+readonly notes="/tmp/messages"
 
 sayit() {
     if [[ -n "${newho:-${who}}" ]]
@@ -30,7 +31,7 @@ commands=(
     bloat bugs calc cookies isup echo faith
     fortune google help/list links money
     ping/test random pbin news rtfm meme
-    sexy slap url yuno r/rhyme
+    sexy slap url yuno r/rhyme pm
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -50,6 +51,9 @@ case "${cmd}" in
         then who= newho= sayit "EGERTHEITW!"
         else who= newho= sayit "${messages[RANDOM%${#messages[@]}]}"
         fi
+        n="$(cut -d' ' -f1 "${notes}" | grep -c "${who}")"
+        (( n > 0 )) && mesg="${n} new messages. use '!pm' to read them"
+        [[ -n "${mesg}" ]] && sayit "${mesg}"
         ;;
     PART)
         messages=(
@@ -224,6 +228,20 @@ case "${cmd}" in
         ;;
     [yY][uU][nN][oO])
         sayit "Y U NO ${mesg:-"y u no?"}"
+        ;;
+    pm)
+        if [[ -z ${newho} && -z ${mesg} ]]
+        then # no mesg - read your personal messages
+            while read -r receiver sender date time mesg
+            do [[ "${receiver}" == "${who}" ]] && chan="${who}" sayit "${date} ${time} <${sender}> ${mesg}"
+            done < "${notes}"
+            printf '%s\n' "g/^${who} /d" "wq" | ed "${notes}"
+        else # leave a personal message
+            [[ -z "${newho}" ]] && sayit "pm who ?" && exit
+            [[ -z "${mesg}" ]] && sayit "pm what ?" && exit
+            # format: 'receiver sender date time mesg' single space in between fields
+            printf -- "%s %s %s %s\n" "${newho}" "${who}" "$(date +"%F %R")" "${mesg}" >> "${notes}" && newho= sayit "noted"
+        fi
         ;;
     *)
         messages=(
