@@ -249,7 +249,7 @@ case "${cmd}" in
         fi
         ;;
     dbt)
-        unset who && sayit "* ba * dum * tss * !! * http://bit.ly/hCDT4P *"
+        unset who && sayit "${mesg/%/ }* ba * dum * tss * !! * http://bit.ly/hCDT4P *"
         ;;
     *)
         messages=(
