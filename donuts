@@ -243,6 +243,9 @@ case "${cmd}" in
             printf -- "%s %s %s %s\n" "${newho}" "${who}" "$(date +"%F %R")" "${mesg}" >> "${notes}" && newho= sayit "noted"
         fi
         ;;
+    dbt)
+        unset who && sayit "* ba * dum * tss * !! * http://bit.ly/hCDT4P *"
+        ;;
     *)
         messages=(
             "you don't know what you're talking about, do you?"
