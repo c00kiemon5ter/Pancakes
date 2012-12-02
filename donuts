@@ -3,9 +3,11 @@
 mesg="$1"
 chan="$2"
 who="${3%\!*}"
-whoami="$4"
-readonly oper="$USER"
-readonly notes="/tmp/messages"
+declare -r whoami="$4"
+declare -r prefix="$5"
+declare -r server="$6"
+declare -r oper="$USER"
+declare -r notes="${prefix}/${server}/messages"
 
 sayit() {
     if [[ -n "${newho:-${who}}" ]]
@@ -36,7 +38,7 @@ commands=(
     bloat bugs calc cookies isup echo faith
     fortune google help/list links money
     ping/test random pbin news rtfm meme
-    sexy slap url yuno r/rhyme pm
+    sexy slap url yuno r/rhyme pm seen
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -56,6 +58,7 @@ case "${cmd}" in
         then who= newho= sayit "EGERTHEITW!"
         else who= newho= sayit "${messages[RANDOM%${#messages[@]}]}"
         fi
+
         n="$(cut -d' ' -f1 "${notes}" | grep -c "${who}")"
         (( n > 0 )) && mesg="${n} new messages. use '!pm' to read them"
         [[ -n "${mesg}" ]] && sayit "${mesg}"
@@ -254,6 +257,10 @@ case "${cmd}" in
         ;;
     dbt)
         unset who && sayit "${mesg/%/ }* ba * dum * tss * !! * http://bit.ly/hCDT4P *"
+        ;;
+    seen)
+        when="$(awk -vn="${mesg}" '$3 == "<"n">" { x = sprintf("%s %s", $1, $2) } END { print x }' "${prefix}/${server}/${chan}/out")"
+        unset who && sayit "${mesg} last seen ${when:-"never"}"
         ;;
     *)
         messages=(
