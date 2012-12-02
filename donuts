@@ -192,9 +192,10 @@ case "${cmd}" in
         unset who
         readonly api='http://glosbe.com/gapi/translate?'
         read -r word _ <<< "$mesg"
-        curl -s "${api}from=${from:-"eng"}&dest=${to:-"eng"}&format=json&phrase=${word}&pretty=true"       \
-            | awk -F"[\"\"]" -vw="$word" '$2 == "text" { if ($4 != w) print $4; if (++i == 10) { exit } }' \
-            | while read -r; do sayit "· $REPLY"; done
+        n=0 && curl -s "${api}from=${from:-"eng"}&dest=${to:-"eng"}&format=json&phrase=${word}&pretty=true" \
+            | awk -F"[\"\"]" -vw="$word" '$2 == "text" { if ($4 != w) print $4; if (++i == 10) { exit } }'  \
+            | while read -r; do (( ++n )) && sayit "· $REPLY"; done
+        (( !n )) && sayit "that, I dont know.."
         ;;
     r|rhyme)
         while read -r word; do
