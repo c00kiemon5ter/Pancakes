@@ -111,20 +111,26 @@ do
         else printf -- '%s\n' "${REPLY}" >> "${prefix}/${server}/${chan}/out"
         fi
 
+        # cleanup tokens
+        nick="${nick%\!*}"
+        nick="${nick#:}"
+        mesg="${mesg#:}"
+
         # handle parts and joins
         if   [[ "${action}" == 'PART' ]]
-        then mesg=':!PART'
+        then mesg='!PART'
         elif [[ "${action}" == 'JOIN' ]]
-        then mesg=':!JOIN'
+        then mesg='!JOIN'
         elif [[ "${action}" != 'PRIVMSG' ]]
         then continue
         fi
 
         # pick up urls and send a !url cmd if not a command already
-        [[ "${mesg}" =~ ^[^\!]*https?:// ]] && mesg=':!'"${mesg/#:/url }"
+        [[ "${mesg}" =~ ^[^\!]?.*https?:// ]] && mesg='!url '"${mesg}"
 
-        [[ "${nick%\!*}" != ":${nickname}" && "${mesg}" =~ ^:\!.+ ]] || continue
-        exec "${cmds}" "${mesg#:\!}" "${chan#:}" "${nick#:}" "${nickname}" | cut -c -255 >&${ircfd} &
+        # execute if command otherwise skip
+        [[ "${nick}" != "${nickname}" && "${mesg}" =~ ^\!.+ ]] || continue
+        exec "${cmds}" "${mesg#\!}" "${chan#}" "${nick#}" "${nickname}" | cut -c -255 >&${ircfd} &
     done
     ) &
 done
