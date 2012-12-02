@@ -7,16 +7,27 @@ cmds="${path}/donuts"
 
 declare -A servers
 
-[[ -r "${conf}" ]] && source "${conf}" ||  {
-    printf -- "error: cannot read configuration: %s\n" "${conf}"
+# check configuration
+if [[ ! -r "${conf}" ]] || ! source "${conf}"
+then
+    printf -- 'error: cannot read configuration: %s\n' "${conf}"
     exit 1
-}
-[[ -r "${cmds}" ]] || {
-    printf -- "error: cannot read commands: %s\n" "${cmds}"
-    exit 1
-}
+fi
 
-[[ "$1" == '-d' ]] && DEBUG=1 || DEBUG=0
+# check commands
+if [[ ! -r "${cmds}" ]]
+then
+    printf -- 'error: cannot read commands: %s\n' "${cmds}"
+    exit 1
+fi
+
+# set raw flag
+if [[ "$1" == '-r' ]]
+then declare -r -i RAW=1
+else declare -r -i RAW=0
+fi
+
+# set default values
 : "${prefix:="${HOME}/irc"}"
 : "${nickname:=pancakes}"
 : "${realname:=cookiebot}"
@@ -25,74 +36,96 @@ declare -A servers
 : "${servername:=biscuit}"
 : "${port:=6667}"
 
-mkdir -p "${prefix}"
+for server in "${!servers[@]}"
+do
+    mkdir -p "${prefix}/${server}"
+    exec {ircfd}<>"${prefix}/${server}/${server}.err" 2>&${ircfd}-
 
-for server in "${!servers[@]}"; do
-    {
-        mkdir -p "${prefix}/${server}"
-        exec {ircfd}<> "${prefix}/${server}/${server}.err" 2>&${ircfd}-
+    # open connection to irc server - skip if failure
+    if exec {ircfd}<>/dev/tcp/${server}/${port}
+    then
+        printf -- 'connected to server %s:%d\n' "${server}" "${port}"
+    else
+        printf -- 'unable to connect to server: %s:%d\n' "${server}" "${port}"
+        continue
+    fi
 
-        if ! exec {ircfd}<> /dev/tcp/${server}/${port}; then
-            printf -- "unable to connect to server: %s:%d\n" "${server}" "${port}"
+    {   # identify to server
+        [[ -n "${passwd}" ]] && printf -- 'PASS %s\n' "${passwd}"
+        printf -- 'NICK %s\n' "${nickname}"
+        printf -- 'USER %s %s %s :%s\n' "${nickname}" "${hostname}" "${servername}" "${realname}"
+        printf -- 'MODE %s %s\n' "${nickname}" "${mode}"
+    } >&${ircfd}
+
+    # wait to get authed with the server
+    while read -r -u ${ircfd}
+    do
+        (( RAW )) && printf -- '%s\n' "$REPLY" >> "${prefix}/${server}/raw.log"
+
+        set -- ${REPLY//$'\r'/}
+        [[ "$1" == 'PING' ]] && printf -- 'PONG %s\n' "$2" >&${ircfd} && continue
+        [[ "$2" == '001'  ]] && break
+    done && printf -- 'authed with server %s:%d\n' "${server}" "${port}"
+
+    # join the channels
+    for channel in ${servers[${server}]}
+    do
+        printf -- 'joining channel %s on %s:%d\n' "${channel}" "${server}" "${port}"
+        printf -- 'JOIN %s\n' "${channel}" >&${ircfd}
+
+        mkdir -p "${prefix}/${server}/${channel}"
+        fifo="${prefix}/${server}/${channel}/in"
+
+        # create fifo to talk to channel
+        rm -f "${fifo}"
+        if ! mkfifo "${fifo}"
+        then
+            printf -- 'error: cannot create fifo %s for channel %s on %s:%d\n' "${fifo}" "${channel}" "${server}" "${port}"
             continue
         fi
 
-        [[ -n "${passwd}" ]] && printf -- "PASS %s\n" "${passwd}" >&${ircfd}
-        printf -- "NICK %s\n" "${nickname}" >&${ircfd}
-        printf -- "USER %s %s %s :%s\n" "${nickname}" "${hostname}" "${servername}" "${realname}" >&${ircfd}
-        printf -- "MODE %s %s\n" "${nickname}" "${mode}" >&${ircfd}
+        exec {fffd}<>"${fifo}"
 
-        while read -r; do # wait to get authed with the server
-            (( DEBUG )) && printf -- "%s\n" "$REPLY" >> "${prefix}/${server}/raw.log"
-            set -- ${REPLY//$'\r'/}
-            [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
-            [[ "$2" == "001" ]] && printf -- "connected to: %s -- joining channels..\n" "${server}" && break
-        done <&${ircfd}
+        # read fifo input and print to appropriate channel
+        while read -r -u ${fffd}
+        do printf -- 'PRIVMSG %s :%s\n' "${channel}" "${REPLY}" >&${ircfd}
+        done &
 
-        for channel in ${servers[${server}]}; do
-            printf -- "JOIN %s\n" "${channel}" >&${ircfd}
+        printf -- 'ACTION %s\n' "Heya peoples :]" >&${fffd}
+        printf -- 'you can talk to %s through %s\n' "${channel}" "${fifo}"
+    done
 
-            mkdir -p "${prefix}/${server}/${channel#\#}"
-            fifo="${prefix}/${server}/${channel#\#}/in"
-            rm -f "${fifo}" && mkfifo "${fifo}" || {
-                printf -- "error: cannot create fifo: %s\n" "${fifo}"
-                continue
-            }
+    (
+    trap 'exec {ircfd}>&-; rm -f ${prefix}/${server}/*/in; kill -TERM 0;' INT TERM EXIT
 
-            {   exec {fffd}<>"${fifo}"
-                trap 'exec {fffd}>&-; rm -f "${fifo}";' EXIT
+    # read raw irc feedback and process messages
+    while read -r -u ${ircfd}
+    do
+        (( RAW )) && printf -- '%s\n' "$REPLY" >> "${prefix}/${server}/raw.log"
 
-                printf -- "ACTION %s\n" "Heya peoples :]" >&${fffd}
+        read -r nick action chan mesg <<< "${REPLY%}"
 
-                while read -r -u ${fffd}
-                do printf -- "PRIVMSG %s :%s\n" "${channel}" "${REPLY}" >&${ircfd}
-                done
-            } &
+        # keep connection alive and save feedback to log
+        if [[ "$nick" == 'PING' ]]
+        then printf -- 'PONG %s\n' "$2" >&${ircfd} && continue
+        else printf -- '%s\n' "${REPLY}" >> "${prefix}/${server}/${chan}/out"
+        fi
 
-            chanpids+=($!)
-        done
+        # handle parts and joins
+        if   [[ "${action}" == 'PART' ]]
+        then mesg=':!PART'
+        elif [[ "${action}" == 'JOIN' ]]
+        then mesg=':!JOIN'
+        elif [[ "${action}" != 'PRIVMSG' ]]
+        then continue
+        fi
 
-        {   trap 'printf -- "QUIT :%s will be back ..\n" "${nickname}" >&${ircfd};
-            exec {ircfd}>&-; for pid in "${chanpids[@]}"; do kill "${pid}"; done;' EXIT
+        # pick up urls and send a !url cmd if not a command already
+        [[ "${mesg}" =~ ^[^\!]*https?:// ]] && mesg=':!'"${mesg/#:/url }"
 
-            while read -r; do
-                (( DEBUG )) && printf -- "%s\n" "$REPLY" >> "${prefix}/${server}/raw.log"
-
-                set -- ${REPLY//$'\r'/}
-                [[ "$1" == "PING" ]] && printf -- "PONG %s\n" "$2" >&${ircfd} && continue
-
-                read -r nick action chan mesg <<< "${REPLY%}"
-                {  [[ "${action}" == "PART" ]] && mesg=':!PART'; } || \
-                {  [[ "${action}" == "JOIN" ]] && mesg=':!JOIN'; } || \
-                   [[ "${action}" == "PRIVMSG" ]] || continue
-
-                printf -- "%s\n" "${REPLY}" >> "${prefix}/${server}/${chan#*\#}/$(date +"%F").log"
-
-                [[ "${mesg}" =~ ^[^\!]*https?:// ]] && mesg=':!'"${mesg/#:/url }" # pick up urls and send a !url cmd if not a commant ^!
-                [[ "${nick%\!*}" != ":${nickname}" && "${mesg}" =~ ^:\!.+ ]] || continue
-                exec "${cmds}" "${mesg#:\!}" "${chan#:}" "${nick#:}" "${nickname}" | cut -c -255 >&${ircfd} &
-            done <&${ircfd}
-        } &
-    } &
+        [[ "${nick%\!*}" != ":${nickname}" && "${mesg}" =~ ^:\!.+ ]] || continue
+        exec "${cmds}" "${mesg#:\!}" "${chan#:}" "${nick#:}" "${nickname}" | cut -c -255 >&${ircfd} &
+    done
+    ) &
 done
 

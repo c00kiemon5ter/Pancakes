@@ -1,6 +1,6 @@
 Pancakes
 ========
-Minimal IRC bot and logger in pure Bash.
+IRC bot and logger in pure Bash.
 
 - Easy configuration on separate file
 - Dynamic configuration and adjustment of commands.
@@ -13,27 +13,16 @@ Minimal IRC bot and logger in pure Bash.
 
 Dependencies
 ------------
-Only deps are Bash shell and coreutils
-(`/bin/{mkdir,mkfifo,rm}`, `/usr/bin/{env,nohup,dirname}`)
+Pure Bash
 
-run as:
-
-    $ nohup ./pancakes
-
-Test it
--------
+Try it live
+-----------
 Connect to freenode network ( _irc.freenode.net:6667_ )
-and join _#foss-aueb_ channel. Try `!list`. Have fun!
+and join _#foss-aueb_ channel. Try `!help`. Have fun!
 
 Proposed commands
 -----------------
-- !all mesg
-  hilight everyone in the room with a message
-
-TODO
-----
-- Documentation
-- Webpage
+- `!all mesg` hilight everyone in the room with a message
 
 License
 -------
