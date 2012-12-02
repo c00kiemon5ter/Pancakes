@@ -38,15 +38,15 @@ fi
 
 for server in "${!servers[@]}"
 do
-    mkdir -p "${prefix}/${server}"
+    mkdir -p "${prefix}/${server}/${nickname}"
     exec {ircfd}<>"${prefix}/${server}/${server}.err" 2>&${ircfd}-
 
     # open connection to irc server - skip if failure
     if exec {ircfd}<>/dev/tcp/${server}/${port}
     then
-        printf -- 'connected to server %s:%d\n' "${server}" "${port}"
+        printf -- 'opened connection to server %s:%d\n' "${server}" "${port}"
     else
-        printf -- 'unable to connect to server: %s:%d\n' "${server}" "${port}"
+        printf -- 'unable to open connection to server %s:%d\n' "${server}" "${port}"
         continue
     fi
 
@@ -96,25 +96,28 @@ do
     done
 
     (
-    trap 'exec {ircfd}>&-; rm -f ${prefix}/${server}/*/in; kill -TERM 0;' INT TERM EXIT
+    trap 'exec {ircfd}>&-; rm -f ${prefix}/${server}/*/in; kill -TERM 0;' EXIT
 
     # read raw irc feedback and process messages
     while read -r -u ${ircfd}
     do
-        (( RAW )) && printf -- '%s\n' "$REPLY" >> "${prefix}/${server}/raw.log"
-
         read -r nick action chan mesg <<< "${REPLY%}"
-
-        # keep connection alive and save feedback to log
-        if [[ "$nick" == 'PING' ]]
-        then printf -- 'PONG %s\n' "$2" >&${ircfd} && continue
-        else printf -- '%s\n' "${REPLY}" >> "${prefix}/${server}/${chan}/out"
-        fi
 
         # cleanup tokens
         nick="${nick%\!*}"
         nick="${nick#:}"
         mesg="${mesg#:}"
+
+        [[ -e "${prefix}/${server}/${chan}" ]] || mkdir -p "${prefix}/${server}/${chan}"
+
+        (( RAW )) && printf -- '%s\n' "$REPLY" >> "${prefix}/${server}/raw.log"
+        (( RAW )) && printf -- '%s\n' "$REPLY" >> "${prefix}/${server}/${chan}/raw.log"
+
+        # keep connection alive and save feedback to log
+        if [[ "$nick" == 'PING' ]]
+        then printf -- 'PONG %s\n' "$2" >&${ircfd} && continue
+        else printf -- '%s <%s> %s\n' "$(date +"%F %R")" "${nick}" "${mesg}" >> "${prefix}/${server}/${chan}/out"
+        fi
 
         # handle parts and joins
         if   [[ "${action}" == 'PART' ]]
