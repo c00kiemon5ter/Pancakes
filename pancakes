@@ -133,7 +133,7 @@ do
 
         # execute if command otherwise skip
         [[ "${nick}" != "${nickname}" && "${mesg}" =~ ^\!.+ ]] || continue
-        exec "${cmds}" "${mesg#\!}" "${chan#}" "${nick#}" "${nickname}" | cut -c -255 >&${ircfd} &
+        exec "${cmds}" "${mesg#\!}" "${chan#}" "${nick#}" "${nickname}" "${prefix}" "${server}" | cut -c -255 >&${ircfd} &
     done
     ) &
 done
