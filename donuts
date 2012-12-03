@@ -35,10 +35,10 @@ else
 fi
 
 commands=(
-    bloat bugs calc cookies isup echo faith
+    bloat bugs calc cookies isup echo pm
     fortune google help/list links money
     ping/test random pbin news rtfm meme
-    sexy slap url yuno r/rhyme pm seen
+    sexy slap url yuno r/rhyme dict seen
 )
 
 [[ "${cmd,,}" == "random" ]] && cmd="${commands[RANDOM%${#commands[@]}]}"
@@ -104,7 +104,8 @@ case "${cmd}" in
     meme)
         unset who
         messages=(
-            "multi ? MUTLI BIKINI ! ΧΩΡΟ-ΧΡΟΝΙΚΗ ΔΙΑΣΠΑΣΗ ΤΩΡΑ ! http://www.arpisoft.gr/patents.html + http://arpisoft/mb.pdf"
+            "multi ? MUTLI BIKINI ! ΧΩΡΟ-ΧΡΟΝΙΚΗ ΔΙΑΣΠΑΣΗ ΤΩΡΑ ! \
+                http://www.arpisoft.gr/patents.html + http://arpisoft/mb.pdf"
             "Sigh. Why my pie die? I so hungry. Now I cry. Life is just a lie. X-(  http://bit.ly/9jwK84"
             "wat? wtf? you haven't read this I guess: http://timecube.com/"
             "ITSATRAP! http://chickencrap.com/media_images/4922.gif"
@@ -119,6 +120,7 @@ case "${cmd}" in
             "problem, ${mesg}?"
             "cool.story.bro."
             "failed"
+            "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
         )
         sayit "${messages[RANDOM%${#messages[@]}]}"
         ;;
@@ -132,10 +134,6 @@ case "${cmd}" in
         ;;
     echo)
         unset who && sayit "$mesg"
-        ;;
-    faith)
-        unset who
-        sayit "believe in Him, trust in Him, be His friend, He will save you. https://lists.launchpad.net/unity-design/msg08084.html"
         ;;
     fortune)
         unset who newho && while read -r; do sayit "$REPLY"; done < <(fortune -osea)
