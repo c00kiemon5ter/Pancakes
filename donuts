@@ -257,6 +257,7 @@ case "${cmd}" in
         unset who && sayit "${mesg/%/ }* ba * dum * tss * !! * http://bit.ly/hCDT4P *"
         ;;
     seen)
+        [[ "${mesg}" == "${whoami}" ]] && newho= sayit "are you blind or just stupid ?" && exit
         when="$(awk -vn="${mesg}" '$3 == "<"n">" { x = sprintf("%s %s", $1, $2) } END { print x }' "${prefix}/${server}/${chan}/out")"
         unset who && sayit "${mesg} last seen ${when:-"never"}"
         ;;
