@@ -22,7 +22,7 @@ sayit() {
 # letter     =  %x41-5A / %x61-7A   ; A-Z / a-z
 # special    =  %x5B-60 / %x7B-7D   ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
 # digit      =  %x30-39             ; 0-9
-readonly nickfmt="([]\\\`_^{|}[:alpha:]])([]\\\`_^{|}[:alnum:]])*"
+declare -r nickfmt="([]\\\`_^{|}[:alpha:]])([]\\\`_^{|}[:alnum:]])*"
 if [[ "${mesg}" =~ ^[[:alpha:]]+[[:space:]]*\>[[:space:]]*${nickfmt} ]]; then
     IFS=\>${IFS} read -r cmd mesg   <<< "${mesg}"
                  read -r newho mesg <<< "${mesg}"
@@ -148,15 +148,15 @@ case "${cmd}" in
         ;;
     google)
         unset who
-        readonly api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
+        declar -r api='http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
         curl -s --get --data-urlencode "q=${mesg// /+}" "${api}"                                  \
             | awk -F"[\"\"]" '{ for (i=2; i<=NF; i+=2) if ($i == "unescapedUrl") print $(i+=2) }' \
             | while read -r; do sayit "· $REPLY"; done
         ;;
     news)
         unset who
-        readonly napi='http://www.google.com/ig/api?news'
-        readonly tapi='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
+        declare -r napi='http://www.google.com/ig/api?news'
+        declare -r tapi='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&longUrl='
         curl -s "${napi}" | awk -F"[<=>\"\"]" '{
         for (f=40; f<=NF; f++)
             if ($f == "title data") a[i++]=$(f+=2)
@@ -193,7 +193,7 @@ case "${cmd}" in
         ;;
     dict)
         unset who
-        readonly api='http://glosbe.com/gapi/translate?'
+        declare -r api='http://glosbe.com/gapi/translate?'
         read -r word _ <<< "$mesg"
         n=0 && curl -s "${api}from=${from:-"eng"}&dest=${to:-"eng"}&format=json&phrase=${word}&pretty=true" \
             | awk -F"[\"\"]" -vw="$word" '$2 == "text" { if ($4 != w) print $4; if (++i == 10) { exit } }'  \
@@ -225,7 +225,7 @@ case "${cmd}" in
         ;;
     url)
         unset who newho
-        readonly api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&format=txt&longUrl='
+        declare -r api='http://api.bitly.com/v3/shorten?login=pancakesbot&apiKey=R_ac2adceb07f01d8faca52bb77c67293b&format=txt&longUrl='
         while read -r url; do
             # minify link if needed
             (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}")"
