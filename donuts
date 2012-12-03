@@ -227,7 +227,7 @@ case "${cmd}" in
             # minify link if needed
             (( ${#url} >= 70 )) && tiny="$(curl -s "${api}${url}")"
             # get link title
-            title="$(curl -s "${url}" | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if (tolower($i) ~ /^title( .+)?/) { print $(i+1); exit } }')"
+            title="$(curl -Ls "${url}" | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if (tolower($i) ~ /^title( .+)?/) { print $(i+1); exit }}')"
             # we're done
             [[ -n "${title}" || -n "${tiny}" ]] && sayit "${tiny} -- ${title:-"no title found"}"
         done < <(awk '{ for (i=1; i<=NF; i++) if ($i ~ /^http/) print $i }' <<< "$mesg")
