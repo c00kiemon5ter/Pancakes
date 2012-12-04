@@ -26,7 +26,7 @@ declare -r nickfmt="([]\\\`_^{|}[:alpha:]])([]\\\`_^{|}[:alnum:]])*"
 if [[ "${mesg}" =~ ^[[:alpha:]]+[[:space:]]*\>[[:space:]]*${nickfmt} ]]; then
     IFS=\>${IFS} read -r cmd mesg   <<< "${mesg}"
                  read -r newho mesg <<< "${mesg}"
-elif [[ "${mesg}" =~ [[:alnum:]]+[[:space:]]*\>[[:space:]]*${nickfmt}$ ]]; then
+elif [[ "${mesg}" =~ ^[[:alpha:]].*\>[[:space:]]*${nickfmt}$ ]]; then
     IFS=\> read -r mesg newho <<< "${mesg}"
            read -r cmd mesg   <<< "${mesg}"
            read -r newho      <<< "${newho}"
