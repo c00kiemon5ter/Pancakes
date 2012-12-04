@@ -200,7 +200,7 @@ case "${cmd}" in
         ;;
     r|rhyme)
         while read -r word; do
-            word="$(tr -cd "*ςάέήίόύώΆΈΉΊΌΎΏ[α-ωΑ-Ω][:alnum:]" <<< "$word")"
+            word="$(tr -cd "*ςστάέήίόύώΆΈΉΊΌΎΏ[α-ωΑ-Ω][:alnum:]" <<< "$word")"
             r=( $(grep -h "^${word//[*]/[^/]*}$" /usr/share/dict/* /usr/share/hunspell/*.dic ) )
             (( !$? )) && mesg="$(sed "s/${word//[*]/[*]}/${r[RANDOM%${#r[@]}]}/" <<< "$mesg")"
         done < <(awk '{ for (i=1; i<=NF; i++) if ($i ~ /[*]/) print $i }' <<< "${mesg}")
