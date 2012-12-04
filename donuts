@@ -53,6 +53,7 @@ case "${cmd}" in
             "pou sai re ${who}"
             "pou eisai mwri ${who} ?"
             "lol, ${who} - yolo yolo yolo!"
+            "ＷＥＬＣＯＭＥ　ＴＯ　ＴＨＥ　ＦＯＳＳ　ＡＵＥＢ　ＩＲＣ　ＣＨＡＮＮＥＬ"
         )
         if [[ "${who}" == "${oper}" ]]
         then who= newho= sayit "EGERTHEITW!"
@@ -60,7 +61,7 @@ case "${cmd}" in
         fi
 
         n="$(cut -d' ' -f1 "${notes}" | grep -c "${who}")"
-        (( n > 0 )) && mesg="${n} new messages. use '!pm' to read them"
+        (( n > 0 )) && mesg="${n} new messages. use '/msg pancakes !pm' to read them"
         [[ -n "${mesg}" ]] && sayit "${mesg}"
         ;;
     PART)
