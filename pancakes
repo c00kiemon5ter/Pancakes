@@ -129,7 +129,7 @@ do
         fi
 
         # pick up urls and send a !url cmd if not a command already
-        [[ "${mesg}" =~ ^[^\!]?.*https?:// ]] && mesg='!url '"${mesg}"
+        [[ "${mesg}" =~ ^[^\!]*https?:// ]] && mesg='!url '"${mesg}"
 
         # execute if command otherwise skip
         [[ "${nick}" != "${nickname}" && "${mesg}" =~ ^\!.+ ]] || continue
