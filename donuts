@@ -125,13 +125,12 @@ case "${cmd}" in
         )
         sayit "${messages[RANDOM%${#messages[@]}]}"
         ;;
-    isitup)
-        while read -r site; do
+    isup)
+        for site in ${mesg}; do
+            site="${site#http*://}" site="${site#www.}"
             sayit "$(curl -s "http://isitup.org/${site}" \
                 | awk -F"[<>]" '{ for (i=1; i<=NF; i++) if(tolower($i) == "title") { print $(i+1); exit } }')"
-        done < <(awk '{ for (i=1; i<=NF; i++)
-            if ($i ~ /^http/) print substr($i, index($i, "://") + 3)
-            else if ($i ~ /^www/) print $i }' <<< "$mesg")
+        done
         ;;
     echo)
         unset who && sayit "$mesg"
